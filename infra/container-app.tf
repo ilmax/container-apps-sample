@@ -140,6 +140,6 @@ resource "azapi_resource" "producer_container_app" {
 resource "azurerm_role_assignment" "producer_service_bus_write" {
   scope                = azurerm_servicebus_queue.aca-test-queue.id
   role_definition_name = "Azure Service Bus Data Sender"
-  principal_id         = azapi_resource.producer_container_app.output.principal_id
+  principal_id         = azapi_resource.producer_container_app.identity.0.principal_id
   depends_on           = [azapi_resource.producer_container_app]
 }
