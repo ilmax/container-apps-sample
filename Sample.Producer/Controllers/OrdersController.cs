@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
 using Sample.Producer.Models;
@@ -14,10 +15,10 @@ namespace Sample.Producer.Controllers
         private readonly ServiceBusConfiguration _serviceBusConfiguration;
         private readonly ILogger<OrdersController> _logger;
 
-        public OrdersController(IServiceBusQueueSender serviceBusQueueSender, ServiceBusConfiguration serviceBusConfiguration, ILogger<OrdersController> logger)
+        public OrdersController(IServiceBusQueueSender serviceBusQueueSender, IOptions<ServiceBusConfiguration> serviceBusConfiguration, ILogger<OrdersController> logger)
         {
             _serviceBusQueueSender = serviceBusQueueSender;
-            _serviceBusConfiguration = serviceBusConfiguration;
+            _serviceBusConfiguration = serviceBusConfiguration.Value;
             _logger = logger;
         }
 

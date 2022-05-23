@@ -62,7 +62,7 @@ resource "azapi_resource" "producer_container_app" {
               },
               {
                 "name" : "ServiceBus__Namespace",
-                "value" : azurerm_servicebus_namespace.aca-test-sb.name
+                "value" : "${azurerm_servicebus_namespace.aca-test-sb.name}.servicebus.windows.net"
               },
               {
                 "name" : "ServiceBus__Queue",
