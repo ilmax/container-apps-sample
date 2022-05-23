@@ -77,69 +77,86 @@ resource "azapi_resource" "producer_container_app" {
   # This seems to be important for the private registry to work(?)
   ignore_missing_property = true
   # Depends on ACR building the image firest
-  depends_on = [azapi_resource.build_producer_acr_task]
+  depends_on             = [azapi_resource.build_producer_acr_task]
+  response_export_values = ["properties.configuration.ingress"]
 }
 
-# resource "azapi_resource" "consumer_container_app" {
-#   name      = "consumer-containerapp"
-#   location  = var.location
-#   parent_id = azurerm_resource_group.aca-test-rg.id
-#   type      = "Microsoft.App/containerApps@2022-03-01"
-#   body = jsonencode({
-#     identity = {
-#       type = "SystemAssigned"
-#     }
-#     properties = {
-#       managedEnvironmentId = azapi_resource.aca-test-environment.id
-#       configuration = {
-#         registries = [
-#           {
-#             server            = azurerm_container_registry.aca-test-registry.login_server
-#             username          = azurerm_container_registry.aca-test-registry.admin_username
-#             passwordSecretRef = "registry-password"
-#           }
-#         ],
-#         secrets : [
-#           {
-#             name = "registry-password"
-#             # Todo: Container apps does not yet support Managed Identity connection to ACR
-#             value = azurerm_container_registry.aca-test-registry.admin_password
-#           }
-#         ]
-#       },
-#       template = {
-#         containers = [
-#           {
-#             image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.consumer_image_name}:latest"
-#             name  = "consumer"
-#             env : [
-#               {
-#                 "name" : "APPINSIGHTS_INSTRUMENTATIONKEY",
-#                 "value" : azurerm_application_insights.aca-test-ai.instrumentation_key
-#               },
-#               {
-#                 "name" : "ServiceBusConnection__fullyQualifiedNamespace",
-#                 "value" : "${azurerm_servicebus_namespace.aca-test-sb.name}.servicebus.windows.net"
-#               },
-#               {
-#                 "name" : "QueueName",
-#                 "value" : azurerm_servicebus_queue.aca-test-queue.name
-#               }
-#             ]
-#           }
-#         ]
-#       }
-#     }
-#   })
-#   # This seems to be important for the private registry to work(?)
-#   ignore_missing_property = true
-#   # Depends on ACR building the image firest
-#   depends_on = [azapi_resource.build_producer_acr_task]
-# }
+resource "azapi_resource" "consumer_container_app" {
+  name      = "consumer-containerapp"
+  location  = var.location
+  parent_id = azurerm_resource_group.aca-test-rg.id
+  type      = "Microsoft.App/containerApps@2022-03-01"
+  body = jsonencode({
+    identity = {
+      type = "SystemAssigned"
+    }
+    properties = {
+      managedEnvironmentId = azapi_resource.aca-test-environment.id
+      configuration = {
+        registries = [
+          {
+            server            = azurerm_container_registry.aca-test-registry.login_server
+            username          = azurerm_container_registry.aca-test-registry.admin_username
+            passwordSecretRef = "registry-password"
+          }
+        ],
+        secrets : [
+          {
+            name = "registry-password"
+            # Todo: Container apps does not yet support Managed Identity connection to ACR
+            value = azurerm_container_registry.aca-test-registry.admin_password
+          }
+        ]
+      },
+      template = {
+        containers = [
+          {
+            image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.consumer_image_name}:latest"
+            name  = "consumer"
+            env : [
+              {
+                "name" : "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value" : azurerm_application_insights.aca-test-ai.instrumentation_key
+              },
+              {
+                "name" : "ServiceBusConnection__fullyQualifiedNamespace",
+                "value" : "${azurerm_servicebus_namespace.aca-test-sb.name}.servicebus.windows.net"
+              },
+              {
+                "name" : "QueueName",
+                "value" : azurerm_servicebus_queue.aca-test-queue.name
+              },
+              {
+                "name" : "ProducerBaseAddress",
+                "value" : "https://${jsondecode(azapi_resource.producer_container_app.output).properties.configuration.ingress.fqdn}"
+              }
+            ]
+          }
+        ]
+        scale = {
+          maxReplicas = 2,
+          minReplicas = 0
+        }
+      }
+    }
+  })
+  # This seems to be important for the private registry to work(?)
+  ignore_missing_property = true
+  # Depends on ACR building the image firest
+  depends_on = [azapi_resource.build_producer_acr_task, azapi_resource.producer_container_app]
+}
 
 resource "azurerm_role_assignment" "producer_service_bus_write" {
   scope                = azurerm_servicebus_queue.aca-test-queue.id
   role_definition_name = "Azure Service Bus Data Sender"
   principal_id         = azapi_resource.producer_container_app.identity.0.principal_id
   depends_on           = [azapi_resource.producer_container_app]
+}
+
+
+resource "azurerm_role_assignment" "consuemr_service_bus_read" {
+  scope                = azurerm_servicebus_namespace.aca-test-sb.id
+  role_definition_name = "Azure Service Bus Data Receiver"
+  principal_id         = azapi_resource.consumer_container_app.identity.0.principal_id
+  depends_on           = [azapi_resource.consumer_container_app]
 }
