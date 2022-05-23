@@ -8,14 +8,6 @@ var builder = Host.CreateDefaultBuilder()
         b.AddServiceBus(options => { options.AutoCompleteMessages = false; });
     })
     .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables("ASPNETCORE_"))
-    .ConfigureAppConfiguration((context, config) =>
-    {
-        config.SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true,
-                reloadOnChange: true)
-            .AddEnvironmentVariables();
-    })
     .ConfigureServices((context, services) =>
     {
         services.AddHttpClient<Processor.DerivedClient>(opt =>
