@@ -20,7 +20,7 @@ resource "azapi_resource" "build_producer_acr_task" {
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/Azure-Samples/aci-helloworld.git#master"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
         dockerFilePath = "Sample.Producer/Dockerfile"
         platform = {
           os = "Linux"
@@ -33,7 +33,7 @@ resource "azapi_resource" "build_producer_acr_task" {
 }
 
 resource "azapi_resource" "build_consumer_acr_task" {
-  name      = "build-producer-task"
+  name      = "build-consumer-task"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
@@ -41,7 +41,7 @@ resource "azapi_resource" "build_consumer_acr_task" {
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#master"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
         dockerFilePath = "Sample.Consumer/Dockerfile"
         platform = {
           os = "Linux"

@@ -1,4 +1,5 @@
-﻿using Azure.Messaging.ServiceBus;
+﻿using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
 
@@ -10,8 +11,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.Configure<ServiceBusConfiguration>(builder.Configuration.GetSection("ServiceBus"));
+Console.WriteLine("SB namespace:" + builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"));
 builder.Services.AddSingleton(
-    new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace")));
+    new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), new DefaultAzureCredential()));
 builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
 
 var app = builder.Build();

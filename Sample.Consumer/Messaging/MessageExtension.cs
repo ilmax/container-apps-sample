@@ -36,7 +36,7 @@ public static class MessageExtension
         }
     }
 
-    private static bool TryExtractCorrelationContext(this ServiceBusReceivedMessage message, out IList<KeyValuePair<string, string>> context)
+    private static bool TryExtractCorrelationContext(this ServiceBusReceivedMessage message, out IList<KeyValuePair<string, string>>? context)
     {
         context = null;
         try

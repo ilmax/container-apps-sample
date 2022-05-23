@@ -3,7 +3,7 @@ resource "azurerm_log_analytics_workspace" "aca-test-ws" {
   name                = "aca-workspace-test"
   location            = var.location
   resource_group_name = azurerm_resource_group.aca-test-rg.name
-  sku                 = "Free"
+  sku                 = "PerGB2018"
   retention_in_days   = 30
   tags                = local.tags
 }
