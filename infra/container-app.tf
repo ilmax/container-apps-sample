@@ -129,6 +129,10 @@ resource "azapi_resource" "consumer_container_app" {
               {
                 "name" : "ProducerBaseAddress",
                 "value" : "https://${jsondecode(azapi_resource.producer_container_app.output).properties.configuration.ingress.fqdn}"
+              },
+              {
+                "name" : "WEBSITE_CLOUD_ROLENAME",
+                "value" : "Sample.Consumer"
               }
             ]
           }
@@ -153,8 +157,7 @@ resource "azurerm_role_assignment" "producer_service_bus_write" {
   depends_on           = [azapi_resource.producer_container_app]
 }
 
-
-resource "azurerm_role_assignment" "consuemr_service_bus_read" {
+resource "azurerm_role_assignment" "consumer_service_bus_read" {
   scope                = azurerm_servicebus_namespace.aca-test-sb.id
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azapi_resource.consumer_container_app.identity.0.principal_id

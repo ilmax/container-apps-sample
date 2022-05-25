@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using AspNetMonsters.ApplicationInsights.AspNetCore;
+using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
@@ -14,6 +15,7 @@ builder.Services.Configure<ServiceBusConfiguration>(builder.Configuration.GetSec
 builder.Services.AddSingleton(
     new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), new DefaultAzureCredential()));
 builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
+builder.Services.AddCloudRoleNameInitializer("Sample.Producer");
 
 var app = builder.Build();
 
