@@ -16,8 +16,8 @@ jobs:
       matrix:
         services:
           [
-            { "repositoryName": "producer", "directory": "./Sample.Producer", "appName" : "producer-containerapp" },
-            { "repositoryName": "consumer", "directory": "./Sample.Consumer", "appName" : "consumer-containerapp" },
+            { "repositoryName": "producer", "directory": "./Sample.Producer", "appName" : "producer-containerapp", "rgName" : "azure-container-app-test" },
+            { "repositoryName": "consumer", "directory": "./Sample.Consumer", "appName" : "consumer-containerapp", "rgName" : "azure-container-app-test" },
           ]
     steps:
       - name: Checkout repository
@@ -54,4 +54,4 @@ jobs:
           echo "Update extension"
           az extension update -n containerapp 
           echo "Starting Deploying"
-          az containerapp update -n velidabookstoreapi -g todocontainerapp-rg -i ${{ steps.image-tag.outputs.tag }} --debug
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }}-rg -i ${{ steps.image-tag.outputs.tag }} --debug
