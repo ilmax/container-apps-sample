@@ -44,7 +44,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.image-tag.outputs.tag }}
+          tags: ${{ steps.image-tag.outputs.tag }},${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:latest
           file: ${{ matrix.services.directory }}/Dockerfile
 
       - name: Deploy azure container app
@@ -52,6 +52,6 @@ jobs:
           echo "Installing containerapp extension"
           az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
           echo "Update extension"
-          az extension update -n continerapp
+          az extension update -n containerapp 
           echo "Starting Deploying"
           az containerapp update -n velidabookstoreapi -g todocontainerapp-rg -i ${{ steps.image-tag.outputs.tag }} --debug
