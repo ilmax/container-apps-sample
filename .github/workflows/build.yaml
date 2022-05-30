@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: build ${{ matrix.services.appName }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,6 +52,6 @@ jobs:
           echo "Installing containerapp extension"
           az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
           echo "Update extension"
-          az extension update -n continerapp --yes
+          az extension update -n continerapp
           echo "Starting Deploying"
           az containerapp update -n velidabookstoreapi -g todocontainerapp-rg -i ${{ steps.image-tag.outputs.tag }} --debug
