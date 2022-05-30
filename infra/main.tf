@@ -10,4 +10,8 @@ resource "azurerm_resource_group" "aca-test-rg" {
   name     = "azure-container-app-test"
   location = var.location
   tags     = local.tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
