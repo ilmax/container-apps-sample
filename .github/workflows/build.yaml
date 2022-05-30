@@ -34,7 +34,7 @@ jobs:
 
       - name: Output image tag
         id: image-tag
-        run: echo "::set-output name=image-${{ matrix.services.repositoryName }}::${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:${{ github.run_id }}
+        run: echo "::set-output name=tag::${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:${{ github.run_id }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -43,7 +43,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.image-tag.outputs.image-${{ matrix.services.repositoryName }} }}
+          tags: ${{ steps.image-tag.outputs.tag }}
           file: ${{ matrix.services.directory }}/Dockerfile
 
       - name: Deploy azure container app
@@ -53,4 +53,4 @@ jobs:
           echo "Update extension"
           az extension update -n continerapp --yes
           echo "Starting Deploying"
-          az containerapp update -n velidabookstoreapi -g todocontainerapp-rg -i ${{ steps.image-tag.outputs.image-${{ matrix.services.repositoryName }} }} --debug
+          az containerapp update -n velidabookstoreapi -g todocontainerapp-rg -i ${{ steps.image-tag.outputs.tag }} --debug
