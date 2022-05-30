@@ -32,8 +32,9 @@ resource "azapi_resource" "producer_container_app" {
       managedEnvironmentId = azapi_resource.aca-test-environment.id
       configuration = {
         ingress = {
-          targetPort = 80
-          external   = true
+          targetPort    = 80
+          external      = true
+          allowInsecure = false
         },
         registries = [
           {
@@ -53,8 +54,12 @@ resource "azapi_resource" "producer_container_app" {
       template = {
         containers = [
           {
-            image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.producer_image_name}:latest"
-            name  = "producer",
+            image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.producer_image_name}:14"
+            name  = "producer"
+            resources = {
+              cpu    = 0.25,
+              memory = "0.5Gi"
+            }
             env : [
               {
                 "name" : "APPINSIGHTS_INSTRUMENTATIONKEY",
@@ -162,6 +167,10 @@ resource "azapi_resource" "consumer_container_app" {
           {
             image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.consumer_image_name}:latest"
             name  = "consumer"
+            resources = {
+              cpu    = 0.25,
+              memory = "0.5Gi"
+            }
             env : [
               {
                 "name" : "APPINSIGHTS_INSTRUMENTATIONKEY",
