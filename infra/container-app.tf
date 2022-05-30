@@ -61,6 +61,10 @@ resource "azapi_resource" "producer_container_app" {
                 "value" : azurerm_application_insights.aca-test-ai.instrumentation_key
               },
               {
+                "name" : "ASPNETCORE_ENVIRONMENT",
+                "value" : "Test"
+              },
+              {
                 "name" : "ServiceBus__Namespace",
                 "value" : "${azurerm_servicebus_namespace.aca-test-sb.name}.servicebus.windows.net"
               },
@@ -69,8 +73,47 @@ resource "azapi_resource" "producer_container_app" {
                 "value" : azurerm_servicebus_queue.aca-test-queue.name
               }
             ]
+            probes = [
+              {
+                httpGet = {
+                  path   = "/healthz",
+                  port   = 80,
+                  scheme = "HTTP"
+                },
+                failureThreshold    = 3
+                successThreshold    = 1
+                initialDelaySeconds = 10
+                periodSeconds       = 10
+                timeoutSeconds      = 3
+                type                = "liveness"
+              },
+              {
+                tcpSocket = {
+                  port = 80
+                },
+                failureThreshold    = 10
+                initialDelaySeconds = 5
+                periodSeconds       = 10
+                timeoutSeconds      = 5
+                type                = "readiness"
+              }
+            ]
           }
-        ]
+        ],
+        scale = {
+          maxReplicas = 2
+          minReplicas = 1
+          rules = [
+            {
+              name = "http-scale-rule"
+              http = {
+                metadata = {
+                  concurrentRequests = "10"
+                }
+              }
+            }
+          ]
+        }
       }
     }
   })
@@ -78,6 +121,7 @@ resource "azapi_resource" "producer_container_app" {
   ignore_missing_property = true
   # Depends on ACR building the image firest
   depends_on             = [azapi_resource.build_producer_acr_task]
+  tags                   = local.tags
   response_export_values = ["properties.configuration.ingress"]
 }
 
@@ -105,6 +149,11 @@ resource "azapi_resource" "consumer_container_app" {
             name = "registry-password"
             # Todo: Container apps does not yet support Managed Identity connection to ACR
             value = azurerm_container_registry.aca-test-registry.admin_password
+          },
+          {
+            name = "sb-conn-str"
+            # TODO: Check if we can use KEDA scalers with Managed identity
+            value = azurerm_servicebus_namespace.aca-test-sb.default_primary_connection_string
           }
         ]
       },
@@ -119,8 +168,16 @@ resource "azapi_resource" "consumer_container_app" {
                 "value" : azurerm_application_insights.aca-test-ai.instrumentation_key
               },
               {
+                "name" : "ASPNETCORE_ENVIRONMENT",
+                "value" : "Test"
+              },
+              {
                 "name" : "ServiceBusConnection__fullyQualifiedNamespace",
                 "value" : "${azurerm_servicebus_namespace.aca-test-sb.name}.servicebus.windows.net"
+              },
+              {
+                "name" : "ServiceBusConnection__credential",
+                "value" : "managedidentity"
               },
               {
                 "name" : "QueueName",
@@ -138,8 +195,26 @@ resource "azapi_resource" "consumer_container_app" {
           }
         ]
         scale = {
-          maxReplicas = 2,
+          maxReplicas = 2
           minReplicas = 0
+          rules = [
+            {
+              name = "sb-scale-rule"
+              custom = {
+                auth = [
+                  {
+                    secretRef        = "sb-conn-str"
+                    triggerParameter = "connection"
+                  }
+                ]
+                metadata = {
+                  messageCount = "5"
+                  queueName    = azurerm_servicebus_queue.aca-test-queue.name
+                }
+                type = "azure-servicebus"
+              }
+            }
+          ]
         }
       }
     }
@@ -148,6 +223,7 @@ resource "azapi_resource" "consumer_container_app" {
   ignore_missing_property = true
   # Depends on ACR building the image firest
   depends_on = [azapi_resource.build_producer_acr_task, azapi_resource.producer_container_app]
+  tags       = local.tags
 }
 
 resource "azurerm_role_assignment" "producer_service_bus_write" {
