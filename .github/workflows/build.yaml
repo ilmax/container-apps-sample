@@ -59,6 +59,8 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.image-tag.outputs.tag }},${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:latest
           file: ${{ matrix.services.directory }}/Dockerfile
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Deploy azure container app with downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == false
@@ -68,7 +70,7 @@ jobs:
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
 
-      - name: Deploy azure container app with downtime
+      - name: Deploy azure container app without downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == true
         run: |
           echo "Installing containerapp extension"
@@ -79,8 +81,10 @@ jobs:
           az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple
           echo "Redirect traffic to active revision"
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $currentRevision=100
+          az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }}
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
+          az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }}
           echo "Redirect traffic to new revision"	
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
           echo "Set single revision mode"
