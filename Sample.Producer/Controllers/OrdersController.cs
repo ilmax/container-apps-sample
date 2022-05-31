@@ -34,7 +34,10 @@ namespace Sample.Producer.Controllers
 
             _logger.LogInformation("Order created");
 
-            return Ok();
+            return Ok(new
+            {
+                environment = Environment.MachineName
+            });
         }
 
         [HttpGet("{id}/discount")]
