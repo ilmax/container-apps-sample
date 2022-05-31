@@ -90,10 +90,10 @@ jobs:
           sleep 10
 
           echo "call health endpoint to check if new revision is ready"
-          health_response_status=$(curl --write-out "%{http_code}\n" -f -s $new_revision_fqdn/healthz --output backend.txt)
+          health_response_status=$(curl --write-out "%{http_code}\n" -f -s https://$new_revision_fqdn/healthz --output backend.txt)
           echo "backend responded with $health_response_status"
 
           echo "Redirect traffic to new revision"	
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight new_revision_name=100 current_revision=0 &> /dev/null
+          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $current_revision=0 &> /dev/null
           echo "Set single revision mode"
           az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
