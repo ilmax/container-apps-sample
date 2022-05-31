@@ -50,8 +50,6 @@ jobs:
       - name: Deploy azure container app
         run: |
           echo "Installing containerapp extension"
-          az extension add --source https://workerappscliextension.blob.core.windows.net/azure-cli-extension/containerapp-0.2.0-py2.py3-none-any.whl --yes
-          echo "Update extension"
-          az extension update -n containerapp 
+          az extension add --name containerapp --upgrade
           echo "Starting Deploying"
-          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} --debug
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}

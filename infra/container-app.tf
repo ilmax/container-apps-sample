@@ -31,6 +31,7 @@ resource "azapi_resource" "producer_container_app" {
     properties = {
       managedEnvironmentId = azapi_resource.aca-test-environment.id
       configuration = {
+        activeRevisionsMode = "multiple"
         ingress = {
           targetPort    = 80
           external      = true
@@ -89,8 +90,21 @@ resource "azapi_resource" "producer_container_app" {
                 successThreshold    = 1
                 initialDelaySeconds = 10
                 periodSeconds       = 10
-                timeoutSeconds      = 3
+                timeoutSeconds      = 5
                 type                = "liveness"
+              },
+              {
+                httpGet = {
+                  path   = "/healthz",
+                  port   = 80,
+                  scheme = "HTTP"
+                },
+                failureThreshold    = 3
+                successThreshold    = 1
+                initialDelaySeconds = 10
+                periodSeconds       = 10
+                timeoutSeconds      = 5
+                type                = "startup"
               },
               {
                 tcpSocket = {
