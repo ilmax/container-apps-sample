@@ -36,14 +36,14 @@ resource "azapi_resource" "producer_container_app" {
           targetPort    = 80
           external      = true
           allowInsecure = false
-        },
+        }
         registries = [
           {
             server            = azurerm_container_registry.aca-test-registry.login_server
             username          = azurerm_container_registry.aca-test-registry.admin_username
             passwordSecretRef = "registry-password"
           }
-        ],
+        ]
         secrets : [
           {
             name = "registry-password"
@@ -51,7 +51,7 @@ resource "azapi_resource" "producer_container_app" {
             value = azurerm_container_registry.aca-test-registry.admin_password
           }
         ]
-      },
+      }
       template = {
         containers = [
           {
