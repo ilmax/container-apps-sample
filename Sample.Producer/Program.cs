@@ -1,6 +1,8 @@
 ﻿using AspNetMonsters.ApplicationInsights.AspNetCore;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
 
@@ -34,6 +36,24 @@ app.UseRouting();
 app.MapControllers();
 
 app.MapHealthChecks("/healthz");
+
+app.MapGet("/", async (HttpContext context, [FromServices]HealthCheckService svc) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogWarning("Calling health checks on {machine}", Environment.MachineName);
+    var healthReport = await svc.CheckHealthAsync();
+
+    if (healthReport.Status == HealthStatus.Healthy)
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.WriteAsync("Healthy");
+    }
+    else
+    {
+        context.Response.StatusCode = 200;
+        await context.Response.WriteAsync("Unhealthy");
+    }
+});
 
 app.Run();
 

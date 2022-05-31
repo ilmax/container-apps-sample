@@ -31,7 +31,7 @@ resource "azapi_resource" "producer_container_app" {
     properties = {
       managedEnvironmentId = azapi_resource.aca-test-environment.id
       configuration = {
-        activeRevisionsMode = "multiple"
+        activeRevisionsMode = "single"
         ingress = {
           targetPort    = 80
           external      = true

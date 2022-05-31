@@ -63,16 +63,5 @@ jobs:
         run: |
           echo "Installing containerapp extension"
           az extension add --name containerapp --upgrade
-          echo "Get current active revisions"
-          activeRevisions=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query "[?properties.active==\`true\`].[name, resourceGroup]" -o tsv)
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
-          echo "activeRevisions=${activeRevisions}" >> $GITHUB_ENV
-
-      - name: Update active revision
-        if: ${{ matrix.services.zeroDowntime }}
-        run: |
-          echo "Make latest revision active"
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
-          echo "Deactivate old revision"
-          echo ${ env.activeRevisions } | xargs -l bash -c 'az containerapp revision deactivate --revision $0 -g $1'
