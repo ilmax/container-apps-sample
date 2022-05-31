@@ -72,17 +72,17 @@ jobs:
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == true
         run: |
           echo "Installing containerapp extension"
-          az extension add --name containerapp --upgrade
+          az extension add --name containerapp --upgrade &> /dev/null
           echo "Get current active revision name"
           currentRevision=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query "[?properties.active==\`true\`].[name]" -o tsv)
           echo "Set multiple revision mode"
-          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple
+          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple &> /dev/null
           echo "Redirect traffic to active revision"
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $currentRevision=100
+          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $currentRevision=100 &> /dev/null
           echo "Create new revision"
-          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
           az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -o table
           echo "Redirect traffic to new revision"	
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
+          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100 &> /dev/null
           echo "Set single revision mode"
-          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single
+          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
