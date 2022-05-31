@@ -36,6 +36,7 @@ resource "azapi_resource" "producer_container_app" {
           targetPort    = 80
           external      = true
           allowInsecure = false
+          transport = "http2"
         }
         registries = [
           {

@@ -79,10 +79,9 @@ jobs:
           az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple
           echo "Redirect traffic to active revision"
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $currentRevision=100
-          az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }}
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
-          az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }}
+          az containerapp ingress traffic show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -o table
           echo "Redirect traffic to new revision"	
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
           echo "Set single revision mode"
