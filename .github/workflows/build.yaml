@@ -16,8 +16,20 @@ jobs:
       matrix:
         services:
           [
-            { "repositoryName": "producer", "directory": "./Sample.Producer", "appName" : "producer-containerapp", "rgName" : "azure-container-app-test" },
-            { "repositoryName": "consumer", "directory": "./Sample.Consumer", "appName" : "consumer-containerapp", "rgName" : "azure-container-app-test" },
+            {
+              "repositoryName": "producer",
+              "directory": "./Sample.Producer",
+              "appName": "producer-containerapp",
+              "rgName": "azure-container-app-test",
+              "zeroDowntime": true,
+            },
+            {
+              "repositoryName": "consumer",
+              "directory": "./Sample.Consumer",
+              "appName": "consumer-containerapp",
+              "rgName": "azure-container-app-test",
+              "zeroDowntime": false,
+            },
           ]
     steps:
       - name: Checkout repository
@@ -35,7 +47,7 @@ jobs:
 
       - name: Output image tag
         id: image-tag
-        run: echo "::set-output name=tag::${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:${{ github.run_id }}"
+        run: echo "tag=${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:${{ github.run_id }}" >> $GITHUB_ENV
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -55,8 +67,12 @@ jobs:
           activeRevisions=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query "[?properties.active==\`true\`].[name, resourceGroup]" -o tsv)
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
-          echo "Make revision active"
+          echo "activeRevisions=${activeRevisions}" >> $GITHUB_ENV
+
+      - name: Update active revision
+        if: ${{ matrix.services.zeroDowntime }}
+        run: |
+          echo "Make latest revision active"
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
           echo "Deactivate old revision"
-          echo $activeRevisions | xargs -l bash -c 'az containerapp revision deactivate --revision $0 -g $1'
-
+          echo ${ env.activeRevisions } | xargs -l bash -c 'az containerapp revision deactivate --revision $0 -g $1'
