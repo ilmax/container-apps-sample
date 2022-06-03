@@ -13,7 +13,7 @@ WORKDIR "/src/Sample.HealthProbesInvoker"
 RUN dotnet build "Sample.HealthProbesInvoker.csproj" -c Release -o /app/build --no-restore
 
 FROM build AS publish
-RUN dotnet publish "Sample.HealthProbesInvoker.csproj" -c Release -o /app/publish --no-build
+RUN dotnet publish "Sample.HealthProbesInvoker.csproj" -c Release -o /app/publish --no-restore
 
 FROM base AS final
 WORKDIR /app

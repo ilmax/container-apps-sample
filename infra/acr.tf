@@ -8,11 +8,17 @@ resource "azurerm_container_registry" "aca-test-registry" {
   tags                = local.tags
 }
 
+resource "random_integer" "name" {
+  min = 1
+  max = 100
+}
+
+
 # Execute the acr task we just created to build the container image
 # azurerm_container_registry_task does not support execute on create (yet)
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/15095
 resource "azapi_resource" "build_producer_acr_task" {
-  name      = "build-producer-task"
+  name      = "build-producer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
@@ -33,7 +39,7 @@ resource "azapi_resource" "build_producer_acr_task" {
 }
 
 resource "azapi_resource" "build_consumer_acr_task" {
-  name      = "build-consumer-task"
+  name      = "build-consumer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
@@ -54,7 +60,7 @@ resource "azapi_resource" "build_consumer_acr_task" {
 }
 
 resource "azapi_resource" "build_healthprobeinvoker_acr_task" {
-  name      = "build-healthprobeinvoker-task"
+  name      = "build-healthprobeinvoker-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
