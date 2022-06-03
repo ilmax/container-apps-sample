@@ -92,8 +92,7 @@ jobs:
           health_response_status=$(curl --write-out "%{http_code}\n" -f -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
-            new_revision_name=$(az containerapp show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query properties.latestRevisionName -o tsv)
-            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $latest_revision=0 &> /dev/null
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100 &> /dev/null
             echo "Set single revision mode"
             az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
           else
