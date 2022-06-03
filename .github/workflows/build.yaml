@@ -81,7 +81,7 @@ jobs:
           echo "Installing containerapp extension"
           az extension add --name containerapp --upgrade &> /dev/null
           echo "Get latest active revision name"
-          latest_revision=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query properties.latestRevisionName -o tsv)
+          latest_revision=$(az containerapp show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query properties.latestRevisionName -o tsv)
           echo "Set multiple revision mode"
           az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple &> /dev/null
           echo "Redirect traffic to active revision $latest_revision"
