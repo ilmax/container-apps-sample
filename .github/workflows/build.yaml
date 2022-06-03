@@ -80,20 +80,19 @@ jobs:
         run: |
           echo "Installing containerapp extension"
           az extension add --name containerapp --upgrade &> /dev/null
-          echo "Get current active revision name"
-          current_revision=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query "[?properties.active==\`true\`].[name]" -o tsv)
+          echo "Get latest active revision name"
+          latest_revision=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query properties.latestRevisionName -o tsv)
           echo "Set multiple revision mode"
           az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple &> /dev/null
-          echo "Redirect traffic to active revision $current_revision"
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $current_revision=100
+          echo "Redirect traffic to active revision $latest_revision"
+          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $latest_revision=100
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
 
           health_response_status=$(curl --write-out "%{http_code}\n" -f -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"	
-            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $current_revision=0 &> /dev/null
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $latest_revision=0 &> /dev/null
             echo "Set single revision mode"
             az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
           else
