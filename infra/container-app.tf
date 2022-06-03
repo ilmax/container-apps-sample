@@ -303,7 +303,7 @@ resource "azapi_resource" "healthprobeinvoker_container_app" {
                 "value" : "Test"
               },
               {
-                "name" : "Azure__SubcriptionId",
+                "name" : "Azure__SubscriptionId",
                 "value" : data.azurerm_subscription.current.subscription_id
               },
               {

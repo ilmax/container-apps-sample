@@ -89,18 +89,13 @@ jobs:
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
 
-          new_revision_name=$(az containerapp revision list -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query 'reverse(sort_by([].{Revision:name,Replicas:properties.replicas,Active:properties.active,Created:properties.createdTime,FQDN:properties.fqdn}[?Active!=`false`], &Created))| [0].Revision' -o tsv)
-          echo "new revision is named $new_revision_name"
-
-          new_revision_fqdn=$(az containerapp revision show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision $new_revision_name --query "properties.fqdn" -o tsv)
-          echo "new revision fqdn is $new_revision_fqdn"
-          sleep 10
-
-          echo "call health endpoint to check if new revision is ready"
-          health_response_status=$(curl --write-out "%{http_code}\n" -f -s https://$new_revision_fqdn/healthz --output backend.txt)
-          echo "backend responded with $health_response_status"
-
-          echo "Redirect traffic to new revision"	
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $current_revision=0 &> /dev/null
-          echo "Set single revision mode"
-          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
+          health_response_status=$(curl --write-out "%{http_code}\n" -f -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
+          if [ $health_response_status = "200" ]; then
+            echo "Redirect traffic to new revision"	
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $new_revision_name=100 $current_revision=0 &> /dev/null
+            echo "Set single revision mode"
+            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
+          else
+            echo "Warmup failed"
+            cat backend.txt
+          fi
