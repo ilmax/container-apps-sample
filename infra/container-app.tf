@@ -1,4 +1,6 @@
 // Container App
+data "azurerm_subscription" "current" {}
+
 // terraform doesn't support creating container apps yet https://github.com/hashicorp/terraform-provider-azurerm/issues/14122
 resource "azapi_resource" "aca-test-environment" {
   name      = "aca-test-environment"
@@ -249,6 +251,82 @@ resource "azapi_resource" "consumer_container_app" {
   tags       = local.tags
 }
 
+resource "azapi_resource" "healthprobeinvoker_container_app" {
+  name      = "healthprobeinvoker-containerapp"
+  location  = var.location
+  parent_id = azurerm_resource_group.aca-test-rg.id
+  type      = "Microsoft.App/containerApps@2022-03-01"
+  body = jsonencode({
+    identity = {
+      type = "SystemAssigned"
+    }
+    properties = {
+      managedEnvironmentId = azapi_resource.aca-test-environment.id
+      configuration = {
+        activeRevisionsMode = "single"
+        ingress = {
+          targetPort    = 80
+          external      = true
+          allowInsecure = false
+        }
+        registries = [
+          {
+            server            = azurerm_container_registry.aca-test-registry.login_server
+            username          = azurerm_container_registry.aca-test-registry.admin_username
+            passwordSecretRef = "registry-password"
+          }
+        ],
+        secrets : [
+          {
+            name = "registry-password"
+            # Todo: Container apps does not yet support Managed Identity connection to ACR
+            value = azurerm_container_registry.aca-test-registry.admin_password
+          }
+        ]
+      },
+      template = {
+        containers = [
+          {
+            image = "${azurerm_container_registry.aca-test-registry.login_server}/${var.healthprobeinvoker_image_name}:latest"
+            name  = "healthprobeinvoker"
+            resources = {
+              cpu    = 0.25,
+              memory = "0.5Gi"
+            }
+            env : [
+              {
+                "name" : "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value" : azurerm_application_insights.aca-test-ai.instrumentation_key
+              },
+              {
+                "name" : "ASPNETCORE_ENVIRONMENT",
+                "value" : "Test"
+              },
+              {
+                "name" : "Azure__SubcriptionId",
+                "value" : data.azurerm_subscription.current.subscription_id
+              },
+              {
+                "name" : "Azure__ResourceGroupName",
+                "value" : azurerm_resource_group.aca-test-rg.name
+              }
+            ]
+          }
+        ]
+        scale = {
+          maxReplicas = 1
+          minReplicas = 1         
+        }
+      }
+    }
+  })
+  # This seems to be important for the private registry to work(?)
+  ignore_missing_property = true
+  # Depends on ACR building the image firest
+  depends_on = [azapi_resource.build_producer_acr_task, azapi_resource.producer_container_app, azapi_resource.build_healthprobeinvoker_acr_task]
+  tags       = local.tags
+}
+
 resource "azurerm_role_assignment" "producer_service_bus_write" {
   scope                = azurerm_servicebus_queue.aca-test-queue.id
   role_definition_name = "Azure Service Bus Data Sender"
@@ -261,4 +339,11 @@ resource "azurerm_role_assignment" "consumer_service_bus_read" {
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azapi_resource.consumer_container_app.identity.0.principal_id
   depends_on           = [azapi_resource.consumer_container_app]
+}
+
+resource "azurerm_role_assignment" "healthprobeinvoker_resource_group_reader" {
+  scope                = azurerm_resource_group.aca-test-rg.id
+  role_definition_name = "Reader"
+  principal_id         = azapi_resource.healthprobeinvoker_container_app.identity.0.principal_id
+  depends_on           = [azapi_resource.healthprobeinvoker_container_app]
 }

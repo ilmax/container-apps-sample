@@ -1,19 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Producer", "Sample.Producer\Sample.Producer.csproj", "{B59ECDFD-A9CA-41E1-9403-C2DCF33DDA46}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Producer", "Sample.Producer\Sample.Producer.csproj", "{B59ECDFD-A9CA-41E1-9403-C2DCF33DDA46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Consumer", "Sample.Consumer\Sample.Consumer.csproj", "{875FCF06-6094-40C9-9EDD-2E9A2D618C01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Consumer", "Sample.Consumer\Sample.Consumer.csproj", "{875FCF06-6094-40C9-9EDD-2E9A2D618C01}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.HealthProbesInvoker", "Sample.HealthProbesInvoker\Sample.HealthProbesInvoker.csproj", "{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B59ECDFD-A9CA-41E1-9403-C2DCF33DDA46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -24,5 +23,15 @@ Global
 		{875FCF06-6094-40C9-9EDD-2E9A2D618C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{875FCF06-6094-40C9-9EDD-2E9A2D618C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{875FCF06-6094-40C9-9EDD-2E9A2D618C01}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F06713C7-7D6C-484F-B642-F3D9F4E63E6E}
 	EndGlobalSection
 EndGlobal

@@ -1,11 +1,11 @@
 name: Build and Deploy
 on:
   push:
-    branches: [main]
+    branches: [main, management]
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
-    branches: [main]
+    branches: [main, management]
   workflow_dispatch:
 
 jobs:
@@ -30,6 +30,13 @@ jobs:
               "rgName": "azure-container-app-test",
               "zeroDowntime": false,
             },
+            {
+              "repositoryName": "warmup",
+              "directory": "./Sample.HealthProbesInvoker",
+              "appName": "healthprobeinvoker-containerapp",
+              "rgName": "azure-container-app-test",
+              "zeroDowntime": false,
+            }
           ]
     steps:
       - name: Checkout repository

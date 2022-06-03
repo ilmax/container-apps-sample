@@ -13,6 +13,11 @@ variable "consumer_image_name" {
   default = "consumer"
 }
 
+variable "healthprobeinvoker_image_name" {
+  type    = string
+  default = "warmup"
+}
+
 variable "environment" {
   type    = string
   default = "dev"

@@ -20,7 +20,7 @@ resource "azapi_resource" "build_producer_acr_task" {
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
         dockerFilePath = "Sample.Producer/Dockerfile"
         platform = {
           os = "Linux"
@@ -41,12 +41,33 @@ resource "azapi_resource" "build_consumer_acr_task" {
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
         dockerFilePath = "Sample.Consumer/Dockerfile"
         platform = {
           os = "Linux"
         }
         imageNames = ["${var.consumer_image_name}:{{.Run.ID}}", "${var.consumer_image_name}:latest"]
+      }
+    }
+  })
+  ignore_missing_property = true
+}
+
+resource "azapi_resource" "build_healthprobeinvoker_acr_task" {
+  name      = "build-healthprobeinvoker-task"
+  location  = var.location
+  parent_id = azurerm_container_registry.aca-test-registry.id
+  type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
+  body = jsonencode({
+    properties = {
+      runRequest = {
+        type           = "DockerBuildRequest"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
+        dockerFilePath = "Sample.HealthProbesInvoker/Dockerfile"
+        platform = {
+          os = "Linux"
+        }
+        imageNames = ["${var.healthprobeinvoker_image_name}:{{.Run.ID}}", "${var.healthprobeinvoker_image_name}:latest"]
       }
     }
   })
