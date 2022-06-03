@@ -89,6 +89,7 @@ jobs:
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
           echo "Warmup new revision"
+          curl -m 60 -f -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt
           health_response_status=$(curl --write-out "%{http_code}\n" -f -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
