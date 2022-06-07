@@ -44,7 +44,7 @@ public class ProbeInvoker
             _logger.LogInformation("Starting to invoke Startup probe for revision {rn}", containerAppRevisionData.Name);
             var startupProbeResult = await CallProbe(containerAppRevisionData.Fqdn, startupProbe);
             result.AddStartupResult(startupProbeResult);
-            _logger.LogInformation("Completed invoking Startup probe for revision {rn} with status {st}", containerAppRevisionData.Name, startupProbeResult);
+            _logger.LogInformation("Completed invoking Startup probe for revision {rn} with status {st}", containerAppRevisionData.Name, startupProbeResult.IsSuccessful);
         }
 
         var readinessProbe = container.Probes.SingleOrDefault(p => p.ProbeType == ProbeType.Readiness);
@@ -53,7 +53,7 @@ public class ProbeInvoker
             _logger.LogInformation("Starting to invoke Readiness probe for revision {rn}", containerAppRevisionData.Name);
             var readinessProbeResult = await CallProbe(containerAppRevisionData.Fqdn, readinessProbe);
             result.AddReadinessResult(readinessProbeResult);
-            _logger.LogInformation("Completed invoking Readiness probe for revision {rn} with status {st}", containerAppRevisionData.Name, readinessProbeResult);
+            _logger.LogInformation("Completed invoking Readiness probe for revision {rn} with status {st}", containerAppRevisionData.Name, readinessProbeResult.IsSuccessful);
         }
 
         var livenessProbe = container.Probes.SingleOrDefault(p => p.ProbeType == ProbeType.Liveness);
@@ -62,7 +62,7 @@ public class ProbeInvoker
             _logger.LogInformation("Starting to invoke Liveness probe for revision {rn}", containerAppRevisionData.Name);
             var livenessProbeResult = await CallProbe(containerAppRevisionData.Fqdn, livenessProbe);
             result.AddLivenessResult(livenessProbeResult);
-            _logger.LogInformation("Completed invoking Liveness probe for revision {rn} with status {st}", containerAppRevisionData.Name, livenessProbeResult);
+            _logger.LogInformation("Completed invoking Liveness probe for revision {rn} with status {st}", containerAppRevisionData.Name, livenessProbeResult.IsSuccessful);
         }
 
         return result;
