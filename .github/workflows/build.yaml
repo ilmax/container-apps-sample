@@ -97,6 +97,8 @@ jobs:
             az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
           else
             echo "Warmup failed with status code $health_response_status"
-            cat backend.txt
+            cat ./backend.txt
+            echo "Reset single revision mode"
+            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single
             exit 1
           fi
