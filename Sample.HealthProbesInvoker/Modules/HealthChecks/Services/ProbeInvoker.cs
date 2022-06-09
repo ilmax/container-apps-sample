@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using Azure.ResourceManager.Applications.Containers;
 using Azure.ResourceManager.Applications.Containers.Models;
 using Sample.HealthProbesInvoker.Modules.HealthChecks.Models;
@@ -101,7 +102,7 @@ public class ProbeInvoker
         {
             var ipAddress = await Dns.GetHostAddressesAsync(requestData.Host ?? fqdn);
             using TcpClient client = new TcpClient();
-            using var cts = new CancellationTokenSource(probeTimeoutSeconds * 1000 ?? 5000);
+            using var cts = new CancellationTokenSource(GetTimeoutInMillis(probeTimeoutSeconds));
             await client.ConnectAsync(ipAddress, requestData.Port, cts.Token);
             sw.Stop();
             return new ProbeResult(sw.Elapsed, DateTimeOffset.UtcNow, ProbeProtocol.Tcp, true, null);
@@ -133,17 +134,36 @@ public class ProbeInvoker
                 request.Headers.TryAddWithoutValidation(header.Name, header.Value);
             }
         }
-        using var cts = new CancellationTokenSource(probeTimeoutSeconds * 1000 ?? 5000);
+        using var cts = new CancellationTokenSource(GetTimeoutInMillis(probeTimeoutSeconds));
         var sw = Stopwatch.StartNew();
-        var response = await client.SendAsync(request, cts.Token);
-        sw.Stop();
         var probeProtocol = string.Equals("https", builder.Scheme, StringComparison.OrdinalIgnoreCase) ? ProbeProtocol.Https : ProbeProtocol.Http;
 
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            return new ProbeResult(sw.Elapsed, DateTimeOffset.UtcNow, probeProtocol, false, response.ReasonPhrase);
+            var response = await client.SendAsync(request, cts.Token);
+            sw.Stop();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return new ProbeResult(sw.Elapsed, DateTimeOffset.UtcNow, probeProtocol, false, response.ReasonPhrase);
+            }
+        }
+        catch (Exception ex)
+        {
+            return new ProbeResult(sw.Elapsed, DateTimeOffset.UtcNow, probeProtocol, false, ex.Message);
         }
 
         return new ProbeResult(sw.Elapsed, DateTimeOffset.UtcNow, probeProtocol, true, null);
+    }
+
+    private int GetTimeoutInMillis(int? probeTimeoutInSeconds, [CallerMemberName] string method = "")
+    {
+        const int defaultTimeoutInSeconds = 5;
+
+        var calculatedTimeout = (probeTimeoutInSeconds ?? defaultTimeoutInSeconds) * 1000;
+
+        _logger.LogInformation("Using {timeout}ms for probe {probe}", calculatedTimeout, method);
+
+        return calculatedTimeout;
     }
 }
