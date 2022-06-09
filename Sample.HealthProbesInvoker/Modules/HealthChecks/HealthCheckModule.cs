@@ -11,6 +11,7 @@ public class HealthCheckModule : IModule
     {
         builder.Services.AddScoped<RevisionSelector>();
         builder.Services.AddScoped<ProbeInvoker>();
+        builder.Services.AddScoped<Handler>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddScoped(_ => new ArmClient(new DefaultAzureCredential(GetDefaultAzureCredentialOptions(builder.Environment))));
