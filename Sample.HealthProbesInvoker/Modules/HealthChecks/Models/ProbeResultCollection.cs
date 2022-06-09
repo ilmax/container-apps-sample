@@ -1,4 +1,4 @@
-namespace Sample.HealthProbesInvoker;
+namespace Sample.HealthProbesInvoker.Modules.HealthChecks.Models;
 
 public class ProbeResultCollection
 {

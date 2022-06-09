@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Sample.HealthProbesInvoker;
+namespace Sample.HealthProbesInvoker.Modules.HealthChecks.Models;
 
 public record ProbeResult(
     TimeSpan Elapsed,

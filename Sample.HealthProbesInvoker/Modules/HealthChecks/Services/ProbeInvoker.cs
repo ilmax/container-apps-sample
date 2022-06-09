@@ -3,8 +3,9 @@ using System.Net;
 using System.Net.Sockets;
 using Azure.ResourceManager.Applications.Containers;
 using Azure.ResourceManager.Applications.Containers.Models;
+using Sample.HealthProbesInvoker.Modules.HealthChecks.Models;
 
-namespace Sample.HealthProbesInvoker;
+namespace Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
 
 public class ProbeInvoker
 {

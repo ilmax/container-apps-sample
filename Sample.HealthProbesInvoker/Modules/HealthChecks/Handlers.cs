@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
 
-namespace Sample.HealthProbesInvoker
+namespace Sample.HealthProbesInvoker.Modules.HealthChecks
 {
     public static class Handlers
     {
