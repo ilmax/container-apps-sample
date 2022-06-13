@@ -2,14 +2,12 @@ name: Build and publish health invoker
 on:
   push:
     branches: [main]
-    # Publish semver tags as releases.
-    tags: ["v*.*.*"]
     paths:
-      - Sample.HealthProbesInvoker
+      - ./Sample.HealthProbesInvoker
   pull_request:
     branches: [main]
     paths:
-      - Sample.HealthProbesInvoker
+      - ./Sample.HealthProbesInvoker
   workflow_dispatch:
 
 env:
