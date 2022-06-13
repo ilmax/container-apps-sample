@@ -12,6 +12,9 @@ jobs:
   build:
     name: build ${{ matrix.services.appName }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     services:
       health-invoker:
         image: gcr.io/${{ github.repository }}/health-invoker:main

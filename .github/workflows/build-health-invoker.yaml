@@ -3,11 +3,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'Sample.HealthProbesInvoker'
+      - 'Sample.HealthProbesInvoker/**'
   pull_request:
     branches: [main]
     paths:
-      - 'Sample.HealthProbesInvoker'
+      - 'Sample.HealthProbesInvoker/**'
   workflow_dispatch:
 
 env:
