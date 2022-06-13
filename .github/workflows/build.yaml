@@ -1,17 +1,28 @@
 name: Build and Deploy
 on:
   push:
-    branches: [main, management]
+    branches: [main]
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
-    branches: [main, management]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     name: build ${{ matrix.services.appName }}
     runs-on: ubuntu-latest
+    services:
+      health-invoker:
+        image: gcr.io/${{ github.repository }}/health-invoker
+        ports:
+          - 5000:80
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
+          AZURE_CLIENT_ID:  ${{ secrets.AZURE_CREDENTIALS.clientId }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
+    env:
+      WARMUP_APP: http://health-invoker:5000
     strategy:
       matrix:
         services:
@@ -29,11 +40,11 @@ jobs:
               "appName": "consumer-containerapp",
               "rgName": "azure-container-app-test",
               "zeroDowntime": false,
-            }
+            },
           ]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Azure login
         uses: azure/login@v1
@@ -81,8 +92,8 @@ jobs:
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $latest_revision=100
           echo "Create new revision"
           az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
-          echo "Warmup new revision at ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }}"
-          health_response_status=$(curl -m 180 --write-out "%{http_code}\n" -s ${{ secrets.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
+          echo "Warmup new revision at ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }}"
+          health_response_status=$(curl -m 180 --write-out "%{http_code}\n" -s ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
             az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100 &> /dev/null

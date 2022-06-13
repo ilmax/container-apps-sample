@@ -61,7 +61,7 @@ static DefaultAzureCredentialOptions GetDefaultAzureCredentialOptions(IHostEnvir
 {
     return new DefaultAzureCredentialOptions
     {
-        ExcludeEnvironmentCredential = true,
+        ExcludeEnvironmentCredential = hostEnvironment.IsDevelopment(),
         ExcludeInteractiveBrowserCredential = true,
         ExcludeAzurePowerShellCredential = true,
         ExcludeSharedTokenCacheCredential = true,
