@@ -5,19 +5,20 @@ resource "azurerm_container_registry" "aca-test-registry" {
   resource_group_name = azurerm_resource_group.aca-test-rg.name
   sku                 = "Basic"
   admin_enabled       = true
-  tags                = local.tags
+
+  tags = local.tags
 }
 
 resource "random_integer" "name" {
   min = 1
-  max = 100
+  max = 1000
 }
 
 
 # Execute the acr task we just created to build the container image
 # azurerm_container_registry_task does not support execute on create (yet)
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/15095
-resource "azapi_resource" "build_producer_acr_task" {
+resource "azapi_resource" "build-producer-acr-task" {
   name      = "build-producer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
@@ -38,7 +39,7 @@ resource "azapi_resource" "build_producer_acr_task" {
   ignore_missing_property = true
 }
 
-resource "azapi_resource" "build_consumer_acr_task" {
+resource "azapi_resource" "build-consumer-acr-task" {
   name      = "build-consumer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id
@@ -59,7 +60,7 @@ resource "azapi_resource" "build_consumer_acr_task" {
   ignore_missing_property = true
 }
 
-resource "azapi_resource" "build_healthprobeinvoker_acr_task" {
+resource "azapi_resource" "build-healthprobeinvoker-acr-task" {
   name      = "build-healthprobeinvoker-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-test-registry.id

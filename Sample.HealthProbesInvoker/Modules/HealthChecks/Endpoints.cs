@@ -4,19 +4,19 @@ namespace Sample.HealthProbesInvoker.Modules.HealthChecks
 {
     public static class Endpoints
     {
-        public static async Task<IResult> WarmupByDefaultAsync(string appName, [FromServices] Handler handler)
+        public static async Task<IResult> WarmupByDefaultAsync(string appName, [FromServices] EndpointHandler endpointHandler)
         {
-            return await handler.ExecuteAsync(null, appName, null);
+            return await endpointHandler.HandleAsync(null, appName, null);
         }
 
-        public static async Task<IResult> WarmupByRevisionNameAsync(string appName, string revisionName, [FromServices] Handler handler)
+        public static async Task<IResult> WarmupByRevisionNameAsync(string appName, string revisionName, [FromServices] EndpointHandler endpointHandler)
         {
-            return await handler.ExecuteAsync(null, appName, revisionName);
+            return await endpointHandler.HandleAsync(null, appName, revisionName);
         }
 
-        public static async Task<IResult> WarmupAsync(string rgName, string appName, string revisionName, [FromServices] Handler handler)
+        public static async Task<IResult> WarmupAsync(string rgName, string appName, string revisionName, [FromServices] EndpointHandler endpointHandler)
         {
-            return await handler.ExecuteAsync(rgName, appName, revisionName);
+            return await endpointHandler.HandleAsync(rgName, appName, revisionName);
         }
     }
 }

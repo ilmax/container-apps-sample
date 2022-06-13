@@ -2,20 +2,20 @@
 
 namespace Sample.HealthProbesInvoker.Modules.HealthChecks;
 
-public class Handler
+public class EndpointHandler
 {
     private readonly RevisionSelector _revisionSelector;
     private readonly ProbeInvoker _prbInvoker;
-    private readonly ILogger<Handler> _logger;
+    private readonly ILogger<EndpointHandler> _logger;
 
-    public Handler(RevisionSelector revisionSelector, ProbeInvoker prbInvoker, ILogger<Handler> logger)
+    public EndpointHandler(RevisionSelector revisionSelector, ProbeInvoker prbInvoker, ILogger<EndpointHandler> logger)
     {
         _revisionSelector = revisionSelector;
         _prbInvoker = prbInvoker;
         _logger = logger;
     }
 
-    public async Task<IResult> ExecuteAsync(string? rgName, string appName, string? revName)
+    public async Task<IResult> HandleAsync(string? rgName, string appName, string? revName)
     {
         try
         {

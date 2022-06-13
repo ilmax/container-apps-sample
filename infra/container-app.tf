@@ -21,7 +21,30 @@ resource "azapi_resource" "aca-test-environment" {
   tags = local.tags
 }
 
-resource "azapi_resource" "producer_container_app" {
+# resource "azapi_resource" "ace-internal" {
+#   name      = "ace-internal"
+#   type      = "Microsoft.App/managedEnvironments@2022-03-01"
+#   location  = var.location
+#   parent_id = azurerm_resource_group.aca-test-rg.id
+#   body = jsonencode({
+#     properties = {
+#       appLogsConfiguration = {
+#         destination = "log-analytics"
+#         logAnalyticsConfiguration = {
+#           customerId = azurerm_log_analytics_workspace.aca-test-ws.workspace_id
+#           sharedKey  = azurerm_log_analytics_workspace.aca-test-ws.primary_shared_key
+#         }
+#       }
+#       vnetConfiguration = {
+#         internal               = false
+#         infrastructureSubnetId = azurerm_subnet.ace-subnet.id
+#       }
+#     }
+#   })
+#   tags = local.tags
+# }
+
+resource "azapi_resource" "producer-container-app" {
   name      = "producer-containerapp"
   location  = var.location
   parent_id = azurerm_resource_group.aca-test-rg.id
@@ -141,12 +164,12 @@ resource "azapi_resource" "producer_container_app" {
   # This seems to be important for the private registry to work(?)
   ignore_missing_property = true
   # Depends on ACR building the image firest
-  depends_on             = [azapi_resource.build_producer_acr_task]
+  depends_on             = [azapi_resource.build-producer-acr-task]
   tags                   = local.tags
   response_export_values = ["properties.configuration.ingress"]
 }
 
-resource "azapi_resource" "consumer_container_app" {
+resource "azapi_resource" "consumer-container-app" {
   name      = "consumer-containerapp"
   location  = var.location
   parent_id = azurerm_resource_group.aca-test-rg.id
@@ -210,7 +233,7 @@ resource "azapi_resource" "consumer_container_app" {
               },
               {
                 "name" : "ProducerBaseAddress",
-                "value" : "https://${jsondecode(azapi_resource.producer_container_app.output).properties.configuration.ingress.fqdn}"
+                "value" : "https://${jsondecode(azapi_resource.producer-container-app.output).properties.configuration.ingress.fqdn}"
               },
               {
                 "name" : "WEBSITE_CLOUD_ROLENAME",
@@ -247,11 +270,11 @@ resource "azapi_resource" "consumer_container_app" {
   # This seems to be important for the private registry to work(?)
   ignore_missing_property = true
   # Depends on ACR building the image firest
-  depends_on = [azapi_resource.build_producer_acr_task, azapi_resource.producer_container_app]
+  depends_on = [azapi_resource.build-producer-acr-task]
   tags       = local.tags
 }
 
-resource "azapi_resource" "healthprobeinvoker_container_app" {
+resource "azapi_resource" "healthprobeinvoker-container-app" {
   name      = "healthprobeinvoker-containerapp"
   location  = var.location
   parent_id = azurerm_resource_group.aca-test-rg.id
@@ -315,7 +338,7 @@ resource "azapi_resource" "healthprobeinvoker_container_app" {
         ]
         scale = {
           maxReplicas = 1
-          minReplicas = 1         
+          minReplicas = 1
         }
       }
     }
@@ -323,27 +346,27 @@ resource "azapi_resource" "healthprobeinvoker_container_app" {
   # This seems to be important for the private registry to work(?)
   ignore_missing_property = true
   # Depends on ACR building the image firest
-  depends_on = [azapi_resource.build_producer_acr_task, azapi_resource.producer_container_app, azapi_resource.build_healthprobeinvoker_acr_task]
+  depends_on = [azapi_resource.build-healthprobeinvoker-acr-task]
   tags       = local.tags
 }
 
-resource "azurerm_role_assignment" "producer_service_bus_write" {
+resource "azurerm_role_assignment" "producer-service-bus-write" {
   scope                = azurerm_servicebus_queue.aca-test-queue.id
   role_definition_name = "Azure Service Bus Data Sender"
-  principal_id         = azapi_resource.producer_container_app.identity.0.principal_id
-  depends_on           = [azapi_resource.producer_container_app]
+  principal_id         = azapi_resource.producer-container-app.identity.0.principal_id
+  depends_on           = [azapi_resource.producer-container-app]
 }
 
-resource "azurerm_role_assignment" "consumer_service_bus_read" {
+resource "azurerm_role_assignment" "consumer-service-bus-read" {
   scope                = azurerm_servicebus_namespace.aca-test-sb.id
   role_definition_name = "Azure Service Bus Data Receiver"
-  principal_id         = azapi_resource.consumer_container_app.identity.0.principal_id
-  depends_on           = [azapi_resource.consumer_container_app]
+  principal_id         = azapi_resource.consumer-container-app.identity.0.principal_id
+  depends_on           = [azapi_resource.consumer-container-app]
 }
 
-resource "azurerm_role_assignment" "healthprobeinvoker_resource_group_reader" {
+resource "azurerm_role_assignment" "healthprobeinvoker-resource-group-reader" {
   scope                = azurerm_resource_group.aca-test-rg.id
   role_definition_name = "Reader"
-  principal_id         = azapi_resource.healthprobeinvoker_container_app.identity.0.principal_id
-  depends_on           = [azapi_resource.healthprobeinvoker_container_app]
+  principal_id         = azapi_resource.healthprobeinvoker-container-app.identity.0.principal_id
+  depends_on           = [azapi_resource.healthprobeinvoker-container-app]
 }

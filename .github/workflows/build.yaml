@@ -29,13 +29,6 @@ jobs:
               "appName": "consumer-containerapp",
               "rgName": "azure-container-app-test",
               "zeroDowntime": false,
-            },
-            {
-              "repositoryName": "warmup",
-              "directory": "./Sample.HealthProbesInvoker",
-              "appName": "healthprobeinvoker-containerapp",
-              "rgName": "azure-container-app-test",
-              "zeroDowntime": false,
             }
           ]
     steps:

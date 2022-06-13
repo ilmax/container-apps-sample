@@ -11,7 +11,7 @@ public class HealthCheckModule : IModule
     {
         builder.Services.AddScoped<RevisionSelector>();
         builder.Services.AddScoped<ProbeInvoker>();
-        builder.Services.AddScoped<Handler>();
+        builder.Services.AddScoped<EndpointHandler>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddScoped(_ => new ArmClient(new DefaultAzureCredential(GetDefaultAzureCredentialOptions(builder.Environment))));
@@ -25,7 +25,7 @@ public class HealthCheckModule : IModule
         app.MapGet("warmup/resourceGroups/{rgName}/apps/{appName}/revisions/{revisionName}", Endpoints.WarmupAsync);
     }
 
-    static DefaultAzureCredentialOptions GetDefaultAzureCredentialOptions(IHostEnvironment hostEnvironment)
+    private static DefaultAzureCredentialOptions GetDefaultAzureCredentialOptions(IHostEnvironment hostEnvironment)
     {
         return new DefaultAzureCredentialOptions
         {
