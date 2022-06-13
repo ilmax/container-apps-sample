@@ -17,7 +17,7 @@ jobs:
       packages: read
     services:
       health-invoker:
-        image: gcr.io/${{ github.repository }}/health-invoker:main
+        image: ghcr.io/${{ github.repository }}/health-invoker:main
         ports:
           - 5000:80
         env:
