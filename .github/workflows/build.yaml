@@ -111,3 +111,10 @@ jobs:
             az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single
             exit 1
           fi
+        
+      - name: Upload backend
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: output
+          path: backend.txt
