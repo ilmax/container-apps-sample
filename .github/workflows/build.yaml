@@ -2,10 +2,14 @@ name: Build and Deploy
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'Sample.HealthProbesInvoker/**'
     # Publish semver tags as releases.
     tags: ["v*.*.*"]
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'Sample.HealthProbesInvoker/**'
   workflow_dispatch:
 
 jobs:
@@ -109,9 +113,8 @@ jobs:
           echo "Redirect traffic to active revision $latest_revision"
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $latest_revision=100 &> /dev/null
           echo "Create new revision"
-          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
           echo "Warmup new revision at ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }}"
-          curl -v -s ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }}
           health_response_status=$(curl -m 180 --write-out "%{http_code}\n" -s ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
@@ -125,10 +128,3 @@ jobs:
             az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single
             exit 1
           fi
-        
-      - name: Upload backend output
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: output
-          path: backend.txt
