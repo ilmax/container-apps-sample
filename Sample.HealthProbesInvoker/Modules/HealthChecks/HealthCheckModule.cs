@@ -20,9 +20,9 @@ public class HealthCheckModule : IModule
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("warmup/{appName}", Endpoints.WarmupByDefaultAsync);
-        app.MapGet("warmup/{appName}/revisions/{revisionName}", Endpoints.WarmupByRevisionNameAsync);
-        app.MapGet("warmup/resourceGroups/{rgName}/apps/{appName}/revisions/{revisionName}", Endpoints.WarmupAsync);
+        app.MapGet("warmup/{appName}", Endpoints.WarmupAppLatestRevisionAsync);
+        app.MapGet("warmup/{appName}/revisions/{revisionName}", Endpoints.WarmupAppRevisionByNameAsync);
+        app.MapGet("warmup/resourceGroups/{rgName}/apps/{appName}/revisions/{revisionName}", Endpoints.WarmupAppRevisionAsync);
     }
 
     private static DefaultAzureCredentialOptions GetDefaultAzureCredentialOptions(IHostEnvironment hostEnvironment)
