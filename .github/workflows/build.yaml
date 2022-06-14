@@ -24,6 +24,8 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
           AZURE_CLIENT_ID:  ${{ secrets.AZURE_CREDENTIALS.clientId }}
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
+          Azure__SubscriptionId: ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
+          Azure__ResourceGroupName: azure-container-app-test
     env:
       WARMUP_APP: http://health-invoker:5000
     strategy:

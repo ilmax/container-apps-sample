@@ -1,6 +1,6 @@
 // Container registry
-resource "azurerm_container_registry" "aca-test-registry" {
-  name                = "acatestregistry"
+resource "azurerm_container_registry" "aca-registry" {
+  name                = "acaimageregistry"
   location            = var.location
   resource_group_name = azurerm_resource_group.aca-test-rg.name
   sku                 = "Basic"
@@ -21,13 +21,13 @@ resource "random_integer" "name" {
 resource "azapi_resource" "build-producer-acr-task" {
   name      = "build-producer-task${random_integer.name.id}"
   location  = var.location
-  parent_id = azurerm_container_registry.aca-test-registry.id
+  parent_id = azurerm_container_registry.aca-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
   body = jsonencode({
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
         dockerFilePath = "Sample.Producer/Dockerfile"
         platform = {
           os = "Linux"
@@ -42,7 +42,7 @@ resource "azapi_resource" "build-producer-acr-task" {
 resource "azapi_resource" "build-consumer-acr-task" {
   name      = "build-consumer-task${random_integer.name.id}"
   location  = var.location
-  parent_id = azurerm_container_registry.aca-test-registry.id
+  parent_id = azurerm_container_registry.aca-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
   body = jsonencode({
     properties = {
@@ -54,27 +54,6 @@ resource "azapi_resource" "build-consumer-acr-task" {
           os = "Linux"
         }
         imageNames = ["${var.consumer_image_name}:{{.Run.ID}}", "${var.consumer_image_name}:latest"]
-      }
-    }
-  })
-  ignore_missing_property = true
-}
-
-resource "azapi_resource" "build-healthprobeinvoker-acr-task" {
-  name      = "build-healthprobeinvoker-task${random_integer.name.id}"
-  location  = var.location
-  parent_id = azurerm_container_registry.aca-test-registry.id
-  type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
-  body = jsonencode({
-    properties = {
-      runRequest = {
-        type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
-        dockerFilePath = "Sample.HealthProbesInvoker/Dockerfile"
-        platform = {
-          os = "Linux"
-        }
-        imageNames = ["${var.healthprobeinvoker_image_name}:{{.Run.ID}}", "${var.healthprobeinvoker_image_name}:latest"]
       }
     }
   })
