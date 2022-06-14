@@ -27,7 +27,7 @@ jobs:
           Azure__SubscriptionId: ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
           Azure__ResourceGroupName: azure-container-app-test
     env:
-      WARMUP_APP: http://health-invoker:5000
+      WARMUP_APP: http://localhost:5000
     strategy:
       matrix:
         services:
