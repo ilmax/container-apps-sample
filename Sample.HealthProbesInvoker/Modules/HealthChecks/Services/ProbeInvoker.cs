@@ -64,7 +64,7 @@ public class ProbeInvoker
         {
             await Task.Delay(TimeSpan.FromSeconds(10));
             containerAppRevisionResource = await containerAppRevisionResource.GetAsync();
-            done = containerAppRevisionResource.Data.ProvisioningState == RevisionProvisioningState.Provisioning;
+            done = containerAppRevisionResource.Data.ProvisioningState == RevisionProvisioningState.Provisioned;
         } while (!done || iteration++ < 5);
 
         if (!done)
