@@ -21,10 +21,10 @@ jobs:
         ports:
           - 5000:80
         env:
-          AZURE_TENANT_ID: ${{ secrets.AZURE_CREDENTIALS.tenantId }}
-          AZURE_CLIENT_ID:  ${{ secrets.AZURE_CREDENTIALS.clientId }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CREDENTIALS.clientSecret }}
-          Azure__SubscriptionId: ${{ secrets.AZURE_CREDENTIALS.subscriptionId }}
+          AZURE_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
+          AZURE_CLIENT_ID:  ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          AZURE_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+          Azure__SubscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
           Azure__ResourceGroupName: azure-container-app-test
     env:
       WARMUP_APP: http://localhost:5000
