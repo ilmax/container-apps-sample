@@ -17,14 +17,21 @@ public class ProbeInvoker
         _logger = logger;
     }
 
-    public async Task<IEnumerable<AggregateProbeResult>> InvokeRevisionProbesAsync(ContainerAppRevisionData containerAppRevision)
+    public async Task<IEnumerable<AggregateProbeResult>> InvokeRevisionProbesAsync(ContainerAppRevisionResource containerAppRevisionResource)
     {
-        if (containerAppRevision == null)
+        if (containerAppRevisionResource == null)
         {
-            throw new ArgumentNullException(nameof(containerAppRevision));
+            throw new ArgumentNullException(nameof(containerAppRevisionResource));
         }
-        if (containerAppRevision.HealthState != RevisionHealthState.Healthy)
+
+        // Ensure we wait for provisioning to succeed
+        containerAppRevisionResource = await EnsureRevisionIsProvisionedAsync(containerAppRevisionResource);
+
+        var containerAppRevision = containerAppRevisionResource.Data;
+
+        if (containerAppRevisionResource.Data.HealthState != RevisionHealthState.Healthy)
         {
+            _logger.LogWarning("Cannot warmup unhealthy revision in state {state}", containerAppRevisionResource.Data.HealthState);
             throw new InvalidOperationException("Cannot check health probes on an unhealthy revision");
         }
 
@@ -35,6 +42,38 @@ public class ProbeInvoker
         }
 
         return result;
+    }
+
+    private async Task<ContainerAppRevisionResource> EnsureRevisionIsProvisionedAsync(ContainerAppRevisionResource containerAppRevisionResource)
+    {
+        // Fast path
+        if (containerAppRevisionResource.Data.ProvisioningState == RevisionProvisioningState.Provisioned)
+        {
+            return containerAppRevisionResource;
+        }
+
+        if (containerAppRevisionResource.Data.ProvisioningState != RevisionProvisioningState.Provisioning)
+        {
+            _logger.LogWarning("Cannot warmup unhealthy revision in provision state {state}", containerAppRevisionResource.Data.ProvisioningState);
+            throw new InvalidOperationException("Revision is not in the provisioned state");
+        }
+
+        bool done;
+        var iteration = 0;
+        do
+        {
+            await Task.Delay(TimeSpan.FromSeconds(10));
+            containerAppRevisionResource = await containerAppRevisionResource.GetAsync();
+            done = containerAppRevisionResource.Data.ProvisioningState == RevisionProvisioningState.Provisioning;
+        } while (!done || iteration++ < 5);
+
+        if (!done)
+        {
+            _logger.LogWarning("Cannot warmup unhealthy revision in provision state {state} after all the retries", containerAppRevisionResource.Data.ProvisioningState);
+            throw new InvalidOperationException("Revision is not in the provisioned state");
+        }
+
+        return containerAppRevisionResource;
     }
 
     private async Task<AggregateProbeResult> WarmUpAsync(ContainerAppRevisionData containerAppRevisionData, ContainerAppContainer container)

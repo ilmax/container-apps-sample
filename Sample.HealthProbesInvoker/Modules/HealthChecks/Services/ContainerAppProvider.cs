@@ -47,7 +47,7 @@ public class ContainerAppProvider
         return containerApp;
     }
 
-    public async Task<ContainerAppRevisionData> GetRevisionAsync(string? resourceGroupName, string applicationName, string? revisionName)
+    public async Task<ContainerAppRevisionResource> GetRevisionAsync(string? resourceGroupName, string applicationName, string? revisionName)
     {
         ContainerAppResource containerApp = await GetContainerAppAsync(resourceGroupName, applicationName);
         if (containerApp is null)
@@ -59,7 +59,7 @@ public class ContainerAppProvider
         return await GetRevisionAsync(containerApp, revisionName);
     }
 
-    public async Task<ContainerAppRevisionData> GetRevisionAsync(ContainerAppResource containerApp, string? revisionName)
+    public async Task<ContainerAppRevisionResource> GetRevisionAsync(ContainerAppResource containerApp, string? revisionName)
     {
         if (containerApp == null) throw new ArgumentNullException(nameof(containerApp));
 
@@ -69,11 +69,9 @@ public class ContainerAppProvider
             throw new InvalidOperationException("Container app not doesn't have an ingress");
         }
 
-        var containerAppRevisionResource = !string.IsNullOrEmpty(revisionName) 
+        return !string.IsNullOrEmpty(revisionName) 
             ? await GetRevisionResourceByNameAsync(containerApp, revisionName) 
             : await GetLatestRevisionAsync(containerApp);
-
-        return containerAppRevisionResource.Data;
     }
 
     public async Task<ContainerAppRevisionResource> GetRevisionResourceByNameAsync(ContainerAppResource containerApp, string revisionName)

@@ -27,8 +27,8 @@ public class EndpointHandler
             {
                 return Results.Ok(new
                 {
-                    status = $"revision {revision.Name} is active and ready to serve traffic",
-                    revision = revision.Name
+                    status = $"revision {revision.Data.Name} is active and ready to serve traffic",
+                    revision = revision.Data.Name
                 });
             }
 
