@@ -9,7 +9,7 @@ public class HealthCheckModule : IModule
 {
     public void RegisterModule(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<RevisionSelector>();
+        builder.Services.AddScoped<ContainerAppProvider>();
         builder.Services.AddScoped<ProbeInvoker>();
         builder.Services.AddScoped<EndpointHandler>();
         builder.Services.AddEndpointsApiExplorer();
@@ -29,7 +29,7 @@ public class HealthCheckModule : IModule
     {
         return new DefaultAzureCredentialOptions
         {
-            ExcludeEnvironmentCredential = true,
+            ExcludeEnvironmentCredential = hostEnvironment.IsDevelopment(),
             ExcludeInteractiveBrowserCredential = true,
             ExcludeAzurePowerShellCredential = true,
             ExcludeSharedTokenCacheCredential = true,

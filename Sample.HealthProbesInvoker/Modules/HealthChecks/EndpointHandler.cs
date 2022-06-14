@@ -4,14 +4,14 @@ namespace Sample.HealthProbesInvoker.Modules.HealthChecks;
 
 public class EndpointHandler
 {
-    private readonly RevisionSelector _revisionSelector;
+    private readonly ContainerAppProvider _containerAppProvider;
     private readonly ProbeInvoker _prbInvoker;
     private readonly ILogger<EndpointHandler> _logger;
 
-    public EndpointHandler(RevisionSelector revisionSelector, ProbeInvoker prbInvoker, ILogger<EndpointHandler> logger)
+    public EndpointHandler(ContainerAppProvider containerAppProvider, ProbeInvoker prbInvoker, ILogger<EndpointHandler> logger)
     {
-        _revisionSelector = revisionSelector;
-        _prbInvoker = prbInvoker;
+        _containerAppProvider = containerAppProvider ?? throw new ArgumentNullException(nameof(containerAppProvider));
+        _prbInvoker = prbInvoker ?? throw new ArgumentNullException(nameof(prbInvoker));
         _logger = logger;
     }
 
@@ -19,7 +19,7 @@ public class EndpointHandler
     {
         try
         {
-            var revision = await _revisionSelector.SelectRevisionAsync(rgName, appName, revName);
+            var revision = await _containerAppProvider.GetRevisionAsync(rgName, appName, revName);
 
             var result = await _prbInvoker.InvokeRevisionProbesAsync(revision);
 
