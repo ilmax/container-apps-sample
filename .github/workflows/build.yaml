@@ -40,16 +40,16 @@ jobs:
               "repositoryName": "producer",
               "directory": "./Sample.Producer",
               "appName": "producer-containerapp",
-              "rgName": "${{ secrets.RESOURCE_GROUP_NAME }}",
+              "rgName": ${{ secrets.RESOURCE_GROUP_NAME }},
               "zeroDowntime": true,
             },
             {
               "repositoryName": "consumer",
               "directory": "./Sample.Consumer",
               "appName": "consumer-containerapp",
-              "rgName": "${{ secrets.RESOURCE_GROUP_NAME }}",
+              "rgName": ${{ secrets.RESOURCE_GROUP_NAME }},
               "zeroDowntime": false,
-            },
+            }
           ]
     steps:
       - name: Checkout repository
