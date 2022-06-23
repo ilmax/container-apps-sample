@@ -56,7 +56,7 @@ resource "azapi_resource" "producer-container-app" {
     properties = {
       managedEnvironmentId = azapi_resource.ace-external.id
       configuration = {
-        activeRevisionsMode = "single"
+        activeRevisionsMode = "multiple"
         ingress = {
           targetPort    = 80
           external      = true
@@ -144,20 +144,20 @@ resource "azapi_resource" "producer-container-app" {
             ]
           }
         ],
-        scale = {
-          maxReplicas = 2
-          minReplicas = 1
-          rules = [
-            {
-              name = "http-scale-rule"
-              http = {
-                metadata = {
-                  concurrentRequests = "10"
-                }
-              }
-            }
-          ]
-        }
+        # scale = {
+        #   maxReplicas = 2
+        #   minReplicas = 1
+        #   rules = [
+        #     {
+        #       name = "http-scale-rule"
+        #       http = {
+        #         metadata = {
+        #           concurrentRequests = "10"
+        #         }
+        #       }
+        #     }
+        #   ]
+        # }
       }
     }
   })
