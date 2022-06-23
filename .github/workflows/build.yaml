@@ -117,7 +117,7 @@ jobs:
           health_response_status=$(curl -m 180 --write-out "%{http_code}\n" -s ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision $new_revision"
-            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight new_revision=100 &> /dev/null
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight new_revision=100 $latest_revision=0 &> /dev/null
             # echo "Set single revision mode"
             # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single &> /dev/null
             echo "Deactivate revision $latest_revision"
@@ -129,5 +129,10 @@ jobs:
             # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single
             echo "Redirect traffic to active revision $latest_revision"
             az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight $latest_revision=100 &> /dev/null
+            # if new_revision is not null
+            if [ ! -z "$new_revision" ]; then
+              echo "Deactivate revision $new_revision"
+              az containerapp revision deactivate -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision $new_revision &> /dev/null
+            fi
             exit 1
           fi
