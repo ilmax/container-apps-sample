@@ -40,14 +40,12 @@ jobs:
               "repositoryName": "producer",
               "directory": "./Sample.Producer",
               "appName": "producer-containerapp",
-              "rgName": ${{ secrets.RESOURCE_GROUP_NAME }},
               "zeroDowntime": true,
             },
             {
               "repositoryName": "consumer",
               "directory": "./Sample.Consumer",
               "appName": "consumer-containerapp",
-              "rgName": ${{ secrets.RESOURCE_GROUP_NAME }},
               "zeroDowntime": false,
             }
           ]
@@ -99,7 +97,7 @@ jobs:
           echo "Installing containerapp extension"
           az extension add --name containerapp --upgrade
           echo "Create new revision"
-          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }}
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} -i ${{ steps.image-tag.outputs.tag }}
 
       - name: Deploy azure container app without downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == true
@@ -107,24 +105,24 @@ jobs:
           echo "Installing containerapp extension"
           az extension add --name containerapp --upgrade &> /dev/null
           echo "Get latest active revision name"
-          latest_revision=$(az containerapp show -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --query properties.latestRevisionName -o tsv)
+          latest_revision=$(az containerapp show -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --query properties.latestRevisionName -o tsv)
           echo "Set multiple revision mode"
-          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode multiple &> /dev/null
+          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode multiple &> /dev/null
           echo "Redirect traffic to active revision $latest_revision"
-          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight $latest_revision=100 &> /dev/null
+          az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight $latest_revision=100 &> /dev/null
           echo "Create new revision"
-          az containerapp update -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
+          az containerapp update -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} -i ${{ steps.image-tag.outputs.tag }} &> /dev/null
           echo "Warmup new revision at ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }}"
           health_response_status=$(curl -m 180 --write-out "%{http_code}\n" -s ${{ env.WARMUP_APP }}/warmup/${{ matrix.services.appName }} --output backend.txt)
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
-            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --revision-weight latest=100 &> /dev/null
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight latest=100 &> /dev/null
             echo "Set single revision mode"
-            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single &> /dev/null
+            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single &> /dev/null
           else
             echo "Warmup failed with status code $health_response_status"
             cat ./backend.txt
             echo "Reset single revision mode"
-            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ matrix.services.rgName }} --mode single
+            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single
             exit 1
           fi
