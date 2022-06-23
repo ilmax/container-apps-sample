@@ -58,6 +58,11 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Log into acr registry
+        if: github.event_name != 'pull_request'
+        run: |
+          az acr login -n ${{ secrets.ACR_REGISTRY }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         
@@ -68,11 +73,6 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-          
-
-      - name: Log into acr registry
-        if: github.event_name != 'pull_request'
-        run: |
-          az acr login -n ${{ secrets.ACR_REGISTRY }}
 
       - name: Output image tag
         id: image-tag
