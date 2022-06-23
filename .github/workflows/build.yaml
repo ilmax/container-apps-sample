@@ -119,7 +119,7 @@ jobs:
             az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight latest=100 &> /dev/null
             # echo "Set single revision mode"
             # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single &> /dev/null
-            az containerapp revision deactivate -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --name $latest_revision &> /dev/null
+            az containerapp revision deactivate -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision $latest_revision &> /dev/null
           else
             echo "Warmup failed with status code $health_response_status"
             cat ./backend.txt
