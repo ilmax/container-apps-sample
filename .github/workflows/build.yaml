@@ -91,6 +91,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: ls buildx cache
+        run:
+          ls -l /tmp/.buildx-cache
+          echo "============================================================"
+          ls -l /tmp
+          echo "============================================================"
+
       - name: Deploy azure container app with downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == false
         run: |
