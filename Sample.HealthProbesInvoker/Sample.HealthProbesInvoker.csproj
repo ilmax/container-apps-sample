@@ -11,17 +11,12 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.6.0" />
     <PackageReference Include="Azure.ResourceManager.Applications.Containers" Version="1.0.0-beta.1" />
-    <PackageReference Include="Azure.ResourceManager.Resources" Version="1.0.0" />
+    <PackageReference Include="Azure.ResourceManager.Resources" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="6.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.16.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.3.1" />
   </ItemGroup>
 

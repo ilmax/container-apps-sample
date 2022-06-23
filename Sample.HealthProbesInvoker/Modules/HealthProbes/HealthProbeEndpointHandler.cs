@@ -1,14 +1,15 @@
-﻿using Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
+﻿using Sample.HealthProbesInvoker.Modules.HealthProbes.Services;
+using Sample.HealthProbesInvoker.Services;
 
-namespace Sample.HealthProbesInvoker.Modules.HealthChecks;
+namespace Sample.HealthProbesInvoker.Modules.HealthProbes;
 
-public class EndpointHandler
+public class HealthProbeEndpointHandler
 {
     private readonly ContainerAppProvider _containerAppProvider;
     private readonly ProbeInvoker _prbInvoker;
-    private readonly ILogger<EndpointHandler> _logger;
+    private readonly ILogger<HealthProbeEndpointHandler> _logger;
 
-    public EndpointHandler(ContainerAppProvider containerAppProvider, ProbeInvoker prbInvoker, ILogger<EndpointHandler> logger)
+    public HealthProbeEndpointHandler(ContainerAppProvider containerAppProvider, ProbeInvoker prbInvoker, ILogger<HealthProbeEndpointHandler> logger)
     {
         _containerAppProvider = containerAppProvider ?? throw new ArgumentNullException(nameof(containerAppProvider));
         _prbInvoker = prbInvoker ?? throw new ArgumentNullException(nameof(prbInvoker));

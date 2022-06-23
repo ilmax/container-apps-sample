@@ -4,7 +4,7 @@ using Azure.ResourceManager.Resources;
 using Microsoft.Extensions.Options;
 using Sample.HealthProbesInvoker.Config;
 
-namespace Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
+namespace Sample.HealthProbesInvoker.Services;
 
 public class ContainerAppProvider
 {
