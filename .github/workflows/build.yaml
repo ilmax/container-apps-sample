@@ -106,8 +106,8 @@ jobs:
           az extension add --name containerapp --upgrade &> /dev/null
           echo "Get latest active revision name"
           latest_revision=$(az containerapp show -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --query properties.latestRevisionName -o tsv)
-          echo "Set multiple revision mode"
-          az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode multiple &> /dev/null
+          # echo "Set multiple revision mode"
+          # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode multiple &> /dev/null
           echo "Redirect traffic to active revision $latest_revision"
           az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight $latest_revision=100 &> /dev/null
           echo "Create new revision"
@@ -117,12 +117,15 @@ jobs:
           if [ $health_response_status = "200" ]; then
             echo "Redirect traffic to new revision"
             az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight latest=100 &> /dev/null
-            echo "Set single revision mode"
-            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single &> /dev/null
+            # echo "Set single revision mode"
+            # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single &> /dev/null
+            az containerapp revision deactivate -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --name $latest_revision &> /dev/null
           else
             echo "Warmup failed with status code $health_response_status"
             cat ./backend.txt
-            echo "Reset single revision mode"
-            az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single
+            # echo "Reset single revision mode"
+            # az containerapp revision set-mode -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --mode single
+            echo "Redirect traffic to active revision $latest_revision"
+            az containerapp ingress traffic set -n ${{ matrix.services.appName }} -g ${{ secrets.RESOURCE_GROUP_NAME }} --revision-weight $latest_revision=100 &> /dev/null
             exit 1
           fi
