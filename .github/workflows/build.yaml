@@ -25,11 +25,11 @@ jobs:
         ports:
           - 5000:80
         env:
-          AZURE_TENANT_ID: ${{ fromJson(secrets.AZURE_CREDENTIALS).tenantId }}
-          AZURE_CLIENT_ID:  ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
-          AZURE_CLIENT_SECRET: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
-          Azure__SubscriptionId: ${{ fromJson(secrets.AZURE_CREDENTIALS).subscriptionId }}
-          Azure__ResourceGroupName: azure-container-app-test
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID:  ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          Azure__SubscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          Azure__ResourceGroupName: ${{ secrets.RESOURCE_GROUP_NAME }}
     env:
       WARMUP_APP: http://localhost:5000
     strategy:
@@ -40,14 +40,14 @@ jobs:
               "repositoryName": "producer",
               "directory": "./Sample.Producer",
               "appName": "producer-containerapp",
-              "rgName": "azure-container-app-test",
+              "rgName": "${{ secrets.RESOURCE_GROUP_NAME }}",
               "zeroDowntime": true,
             },
             {
               "repositoryName": "consumer",
               "directory": "./Sample.Consumer",
               "appName": "consumer-containerapp",
-              "rgName": "azure-container-app-test",
+              "rgName": "${{ secrets.RESOURCE_GROUP_NAME }}",
               "zeroDowntime": false,
             },
           ]
