@@ -65,8 +65,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-        with:
-          buildkitd-flags: --debug
         
       - name: Cache Docker layers
         uses: actions/cache@v2
@@ -92,10 +90,6 @@ jobs:
           file: ${{ matrix.services.directory }}/Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: ls buildx cache
-        run:
-          ls -l /tmp
 
       - name: Deploy azure container app with downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == false
