@@ -1,4 +1,5 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Azure.ResourceManager;
 using Sample.HealthProbesInvoker.Config;
 using Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
@@ -14,7 +15,7 @@ public class HealthCheckModule : IModule
         builder.Services.AddScoped<EndpointHandler>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddScoped(_ => new ArmClient(new DefaultAzureCredential(GetDefaultAzureCredentialOptions(builder.Environment))));
+        builder.Services.AddScoped(_ => new ArmClient(GetAzureCredential(builder.Environment)));
         builder.Services.Configure<AzureConfig>(builder.Configuration.GetSection("Azure"));
     }
 
@@ -25,18 +26,12 @@ public class HealthCheckModule : IModule
         app.MapGet("warmup/resourceGroups/{rgName}/apps/{appName}/revisions/{revisionName}", Endpoints.WarmupAppRevisionAsync);
     }
 
-    private static DefaultAzureCredentialOptions GetDefaultAzureCredentialOptions(IHostEnvironment hostEnvironment)
+    private static TokenCredential GetAzureCredential(IHostEnvironment hostEnvironment)
     {
-        return new DefaultAzureCredentialOptions
+        if (hostEnvironment.IsDevelopment())
         {
-            ExcludeEnvironmentCredential = hostEnvironment.IsDevelopment(),
-            ExcludeInteractiveBrowserCredential = true,
-            ExcludeAzurePowerShellCredential = true,
-            ExcludeSharedTokenCacheCredential = true,
-            ExcludeVisualStudioCodeCredential = true,
-            ExcludeVisualStudioCredential = !hostEnvironment.IsDevelopment(),
-            ExcludeAzureCliCredential = !hostEnvironment.IsDevelopment(),
-            ExcludeManagedIdentityCredential = hostEnvironment.IsDevelopment(),
-        };
+            return new DefaultAzureCredential();
+        }
+        return new ManagedIdentityCredential();
     }
 }

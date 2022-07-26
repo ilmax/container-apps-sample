@@ -14,7 +14,6 @@ resource "random_integer" "name" {
   max = 1000
 }
 
-
 # Execute the acr task we just created to build the container image
 # azurerm_container_registry_task does not support execute on create (yet)
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/15095

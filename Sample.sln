@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Producer", "Sample.P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Consumer", "Sample.Consumer\Sample.Consumer.csproj", "{875FCF06-6094-40C9-9EDD-2E9A2D618C01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.HealthProbesInvoker", "Sample.HealthProbesInvoker\Sample.HealthProbesInvoker.csproj", "{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.HealthProbesInvoker", "Sample.HealthProbesInvoker\Sample.HealthProbesInvoker.csproj", "{BC8A03ED-EEAC-4170-BC58-29DC5950DC04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
