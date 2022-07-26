@@ -3,5 +3,5 @@
 public interface IModule
 {
     void RegisterModule(WebApplicationBuilder builder);
-    void MapEndpoints(IEndpointRouteBuilder endpoints);
+    void MapEndpoints(IEndpointRouteBuilder app);
 }

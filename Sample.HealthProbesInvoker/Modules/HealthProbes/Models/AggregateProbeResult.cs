@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Sample.HealthProbesInvoker.Modules.HealthChecks.Models;
+namespace Sample.HealthProbesInvoker.Modules.HealthProbes.Models;
 
 public class AggregateProbeResult
 {

@@ -2,17 +2,18 @@
 using Azure.Identity;
 using Azure.ResourceManager;
 using Sample.HealthProbesInvoker.Config;
-using Sample.HealthProbesInvoker.Modules.HealthChecks.Services;
+using Sample.HealthProbesInvoker.Modules.HealthProbes.Services;
+using Sample.HealthProbesInvoker.Services;
 
-namespace Sample.HealthProbesInvoker.Modules.HealthChecks;
+namespace Sample.HealthProbesInvoker.Modules.HealthProbes;
 
-public class HealthCheckModule : IModule
+public class HealthProbeModule : IModule
 {
     public void RegisterModule(WebApplicationBuilder builder)
     {
         builder.Services.AddScoped<ContainerAppProvider>();
         builder.Services.AddScoped<ProbeInvoker>();
-        builder.Services.AddScoped<EndpointHandler>();
+        builder.Services.AddScoped<HealthProbeEndpointHandler>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddScoped(_ => new ArmClient(GetAzureCredential(builder.Environment)));
