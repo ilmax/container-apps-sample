@@ -6,13 +6,13 @@ public class DeploymentModule : IModule
 {
     public void RegisterModule(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<TrafficManager>();
+        builder.Services.AddScoped<RevisionManager>();
         builder.Services.AddScoped<DeploymentEndpointHandler>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)
     {
-        app.MapGet("apps/{appName}/deploy/{imageName}", Endpoints.DeployNewImageCurrentRgAsync);
-        app.MapGet("resourceGroups/{rgName}/apps/{appName}/deploy/{imageName}", Endpoints.DeployNewImageAsync);
+        app.MapGet("resource-groups/default/apps/{appName}/deploy", Endpoints.DeployNewImageCurrentRgAsync);
+        app.MapGet("resource-groups/{rgName}/apps/{appName}/deploy", Endpoints.DeployNewImageAsync);
     }
 }

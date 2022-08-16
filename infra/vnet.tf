@@ -11,5 +11,5 @@ resource "azurerm_subnet" "aca-subnet" {
   name                 = "aca-subnet"
   resource_group_name  = azurerm_resource_group.aca-test-rg.name
   virtual_network_name = azurerm_virtual_network.aca-vnet.name
-  address_prefixes     = ["10.0.10.0/23"]
+  address_prefixes     = ["10.0.16.0/23"]
 }

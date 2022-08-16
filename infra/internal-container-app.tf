@@ -16,7 +16,7 @@ resource "azapi_resource" "ace-internal" {
       }
       vnetConfiguration = {
         internal               = false
-        runtimeSubnetId        = resource.azurerm_subnet.aca-subnet.id
+        infrastructureSubnetId = resource.azurerm_subnet.aca-subnet.id
       }
     }
   })
@@ -84,13 +84,21 @@ resource "azapi_resource" "producer-container-app-internal" {
               },
               {
                 name  = "IPFiltering__Whitelist__1",
+                value = azurerm_subnet.aca-subnet.address_prefixes[0]
+              },
+              {
+                name  = "IPFiltering__Whitelist__2",
+                value = "92.65.5.97"
+              },
+              {
+                name  = "IPFiltering__Whitelist__3",
                 value = "77.166.56.151"
               }
             ]
             probes = [
               {
                 httpGet = {
-                  path   = "/healthz"
+                  path   = "/healthz/liveness"
                   port   = 80
                   scheme = "HTTP"
                 }
@@ -103,7 +111,7 @@ resource "azapi_resource" "producer-container-app-internal" {
               },
               {
                 httpGet = {
-                  path   = "/healthz"
+                  path   = "/healthz/startup"
                   port   = 80
                   scheme = "HTTP"
                 }
@@ -129,7 +137,7 @@ resource "azapi_resource" "producer-container-app-internal" {
         ]
         scale = {
           maxReplicas = 1
-          minReplicas = 0
+          minReplicas = 1
         }
       }
     }

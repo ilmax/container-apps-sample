@@ -47,7 +47,7 @@ resource "azapi_resource" "build-consumer-acr-task" {
     properties = {
       runRequest = {
         type           = "DockerBuildRequest"
-        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#management"
+        sourceLocation = "https://github.com/ilmax/container-apps-sample.git#main"
         dockerFilePath = "Sample.Consumer/Dockerfile"
         platform = {
           os = "Linux"
