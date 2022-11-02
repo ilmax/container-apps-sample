@@ -1,6 +1,6 @@
 // Container registry
 resource "azurerm_container_registry" "aca-registry" {
-  name                = "acaimageregistry"
+  name                = "acaimageregistrymax"
   location            = var.location
   resource_group_name = azurerm_resource_group.aca-test-rg.name
   sku                 = "Basic"

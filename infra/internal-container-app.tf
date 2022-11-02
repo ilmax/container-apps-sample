@@ -1,7 +1,7 @@
 // Container App creation
 // terraform doesn't support creating container apps yet https://github.com/hashicorp/terraform-provider-azurerm/issues/14122
 resource "azapi_resource" "ace-internal" {
-  name      = "ace-internal"
+  name      = "ace-internal-new"
   type      = "Microsoft.App/managedEnvironments@2022-03-01"
   location  = var.location
   parent_id = azurerm_resource_group.aca-test-rg.id

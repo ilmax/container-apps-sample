@@ -1,13 +1,11 @@
-﻿using System.Text.Json;
-using AspNetMonsters.ApplicationInsights.AspNetCore;
+﻿using AspNetMonsters.ApplicationInsights.AspNetCore;
 using Azure.Core;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging.Console;
-using Microsoft.Extensions.Options;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
-using ZNetCS.AspNetCore.IPFiltering;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,12 +32,18 @@ builder.Services.AddSingleton(
 new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), credentials));
 builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
 builder.Services.AddCloudRoleNameInitializer("Sample.Producer");
-builder.Services.AddIPFiltering(builder.Configuration.GetSection("IPFiltering"));
+builder.Services.AddHttpLogging(opt =>
+{
+    opt.LoggingFields = HttpLoggingFields.All;
+    opt.RequestHeaders.Add("X-Forwarded-For");
+    opt.RequestHeaders.Add("X-Forwarded-Proto");
+    opt.RequestHeaders.Add("X-Forwarded-Host");
+});
 
 var app = builder.Build();
-app.UseIPFiltering();
 
 // Configure the HTTP request pipeline.
+app.UseHttpLogging();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseRouting();
@@ -47,11 +51,6 @@ app.UseRouting();
 app.MapControllers();
 app.MapGet("/", () => "Hello");
 app.MapGet("/healthz/liveness", () => "Alive");
-app.MapGet("/healthz/startup", (IOptions<IPFilteringOptions> opt , ILogger<Program> logger) =>
-{
-    logger.LogWarning("IPFiltering options are: " + JsonSerializer.Serialize(opt));
-    return "Started" + JsonSerializer.Serialize(opt);
-});
 app.Run();
 
 static TokenCredential GetAzureCredentials(IHostEnvironment hostEnvironment)
