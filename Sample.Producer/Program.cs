@@ -28,7 +28,7 @@ builder.Services.AddLogging(loggingBuilder =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddApplicationInsightsTelemetry(.);
+builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.Configure<ServiceBusConfiguration>(builder.Configuration.GetSection("ServiceBus"));
 builder.Services.AddSingleton(
 new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), credentials));

@@ -9,13 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="6.0.3" />
+    <PackageReference Include="AspNetCore.HealthChecks.AzureServiceBus" Version="6.0.4" />
     <PackageReference Include="AspNetMonsters.ApplicationInsights.AspNetCore" Version="1.1.24" />
-    <PackageReference Include="Azure.Identity" Version="1.6.0" />
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.9.0" />
+    <PackageReference Include="Azure.Identity" Version="1.7.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.11.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.10" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="ZNetCS.AspNetCore.IPFiltering" Version="6.0.1" />
   </ItemGroup>

@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.6.0" />
+    <PackageReference Include="Azure.Identity" Version="1.7.0" />
     <PackageReference Include="Azure.ResourceManager.Applications.Containers" Version="1.0.0-beta.1" />
-    <PackageReference Include="Azure.ResourceManager.Resources" Version="1.2.0" />
-    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="6.0.7">
+    <PackageReference Include="Azure.ResourceManager.Resources" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="6.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
-    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.16.1">
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.17.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
