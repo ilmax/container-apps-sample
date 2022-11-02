@@ -80,8 +80,6 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.image-tag.outputs.tag }},${{ secrets.ACR_REGISTRY }}/${{ matrix.services.repositoryName }}:latest
           file: ${{ matrix.services.directory }}/Dockerfile
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Deploy azure container app with downtime
         if: github.event_name != 'pull_request' && matrix.services.zeroDowntime == false
