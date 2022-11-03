@@ -13,6 +13,7 @@
     <OpenApiReference Include="swagger.json" CodeGenerator="NSwagCSharp" Namespace="Sample.Consumer.Http" ClassName="ProducerClient" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.21.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.8.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.33" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="6.0.10">

@@ -19,10 +19,11 @@ var builder = Host.CreateDefaultBuilder()
     .ConfigureLogging((context, logging) =>
     {
         string instrumentationKey = context.Configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-        if (!string.IsNullOrEmpty(instrumentationKey))
+        if (string.IsNullOrEmpty(instrumentationKey))
         {
-            logging.AddApplicationInsightsWebJobs(o => o.InstrumentationKey = instrumentationKey);
+            throw new InvalidOperationException("Missing app insight key");
         }
+        logging.AddApplicationInsightsWebJobs(o => o.InstrumentationKey = instrumentationKey);
         logging.AddSimpleConsole();
     })
     .UseConsoleLifetime();
