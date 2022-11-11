@@ -34,7 +34,6 @@ builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
 builder.Services.AddCloudRoleNameInitializer("Sample.Producer");
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 
-
 var app = builder.Build();
 
 var ready = false;

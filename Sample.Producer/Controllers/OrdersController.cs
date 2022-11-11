@@ -25,6 +25,7 @@ namespace Sample.Producer.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> Create(Order order)
         {
             _logger.LogInformation("Creating order");

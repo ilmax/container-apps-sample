@@ -48,6 +48,11 @@ resource "azuread_application" "producer-container-app-application" {
   }
 }
 
+resource "azuread_service_principal" "producer-container-app-internal-sp" {
+  application_id = azuread_application.producer-container-app-application.application_id
+  description    = "Service principal for ${local.serverAppName} managed by terraform"
+}
+
 resource "azapi_resource" "producer-container-app-internal" {
   name      = "producer-containerapp-internal"
   location  = var.location
@@ -175,6 +180,13 @@ resource "azapi_resource" "producer-container-app-internal" {
   response_export_values = ["properties.configuration.ingress"]
 }
 
+
+resource "azuread_app_role_assignment" "example" {
+  app_role_id         = "00000000-0000-0000-0000-000000000000"
+  principal_object_id = azapi_resource.producer-container-app-internal.identity.0.principal_id
+  resource_object_id  = azuread_service_principal.producer-container-app-internal-sp.object_id
+}
+
 resource "azapi_resource" "consumer-container-app-internal" {
   name      = "consumer-containerapp-internal"
   location  = var.location
@@ -246,12 +258,8 @@ resource "azapi_resource" "consumer-container-app-internal" {
                 "value" : "Sample.Consumer"
               },
               {
-                "name" : "TenantId"
-                "value" : data.azurerm_subscription.current.tenant_id
-              },
-              {
-                "name" : "ClientId"
-                "value" : azapi_resource.producer-container-app-internal.identity.0.principal_id
+                "name" : "Server__ApplicationId"
+                "value" : azuread_application.producer-container-app-application.application_id
               }
             ]
           }
