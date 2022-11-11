@@ -42,11 +42,12 @@ using var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
 timer.WaitForNextTickAsync().AsTask().ContinueWith(_ => ready = true);
 
 // Configure the HTTP request pipeline.
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/", () => "Hello");
