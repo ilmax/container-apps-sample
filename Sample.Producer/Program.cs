@@ -2,8 +2,8 @@
 using Azure.Core;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Identity.Web;
 using Sample.Producer.Communication;
 using Sample.Producer.Config;
 
@@ -32,25 +32,40 @@ builder.Services.AddSingleton(
 new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), credentials));
 builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
 builder.Services.AddCloudRoleNameInitializer("Sample.Producer");
-builder.Services.AddHttpLogging(opt =>
-{
-    opt.LoggingFields = HttpLoggingFields.All;
-    opt.RequestHeaders.Add("X-Forwarded-For");
-    opt.RequestHeaders.Add("X-Forwarded-Proto");
-    opt.RequestHeaders.Add("X-Forwarded-Host");
-});
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
+
 
 var app = builder.Build();
 
+var ready = false;
+using var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
+timer.WaitForNextTickAsync().AsTask().ContinueWith(_ => ready = true);
+
 // Configure the HTTP request pipeline.
-app.UseHttpLogging();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseRouting();
 
 app.MapControllers();
 app.MapGet("/", () => "Hello");
-app.MapGet("/healthz/liveness", () => "Alive");
+app.MapGet("/healthz/liveness", () =>
+{
+    app.Logger.LogInformation("Liveness probe called");
+    return "Alive";
+});
+app.MapGet("/healthz/startup", () =>
+{
+    app.Logger.LogInformation("Startup probe called");
+
+    if (ready)
+    {
+        return Results.Ok("Alive v2");
+    }
+
+    return Results.BadRequest("Not yet ready");
+});
 app.Run();
 
 static TokenCredential GetAzureCredentials(IHostEnvironment hostEnvironment)

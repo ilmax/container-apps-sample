@@ -1,7 +1,11 @@
+locals {
+  serverAppName = "producer-containerapp-internal"
+}
+
 // Container App creation
 // terraform doesn't support creating container apps yet https://github.com/hashicorp/terraform-provider-azurerm/issues/14122
 resource "azapi_resource" "ace-internal" {
-  name      = "ace-internal-new"
+  name      = "ace-internal"
   type      = "Microsoft.App/managedEnvironments@2022-03-01"
   location  = var.location
   parent_id = azurerm_resource_group.aca-test-rg.id
@@ -21,6 +25,27 @@ resource "azapi_resource" "ace-internal" {
     }
   })
   tags = local.tags
+}
+
+resource "random_uuid" "producer-container-app-application-api-id" {}
+
+resource "azuread_application" "producer-container-app-application" {
+  display_name = local.serverAppName
+
+  api {
+    requested_access_token_version = 2
+
+    oauth2_permission_scope {
+      admin_consent_description  = "Allow the application to access ${local.serverAppName} on behalf of the signed-in user."
+      admin_consent_display_name = "Allow access to ${local.serverAppName}"
+      enabled                    = true
+      id                         = random_uuid.producer-container-app-application-api-id.result
+      type                       = "User"
+      user_consent_description   = "Allow the application to access example on your behalf."
+      user_consent_display_name  = "Access example"
+      value                      = "user_impersonation"
+    }
+  }
 }
 
 resource "azapi_resource" "producer-container-app-internal" {
@@ -83,16 +108,16 @@ resource "azapi_resource" "producer-container-app-internal" {
                 "value" : azurerm_servicebus_queue.aca-queue.name
               },
               {
-                name  = "IPFiltering__Whitelist__1",
-                value = azurerm_subnet.aca-subnet.address_prefixes[0]
+                "name" : "AzureAd__Instance"
+                "value" : "https://login.microsoftonline.com/"
               },
               {
-                name  = "IPFiltering__Whitelist__2",
-                value = "92.65.5.97"
+                "name" : "AzureAd__TenantId"
+                "value" : data.azurerm_subscription.current.tenant_id
               },
               {
-                name  = "IPFiltering__Whitelist__3",
-                value = "77.166.56.151"
+                "name" : "AzureAd__ClientId"
+                "value" : azuread_application.producer-container-app-application.application_id
               }
             ]
             probes = [
@@ -219,6 +244,14 @@ resource "azapi_resource" "consumer-container-app-internal" {
               {
                 "name" : "WEBSITE_CLOUD_ROLENAME"
                 "value" : "Sample.Consumer"
+              },
+              {
+                "name" : "TenantId"
+                "value" : data.azurerm_subscription.current.tenant_id
+              },
+              {
+                "name" : "ClientId"
+                "value" : azapi_resource.producer-container-app-internal.identity.0.principal_id
               }
             ]
           }

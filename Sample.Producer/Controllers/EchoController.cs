@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Producer.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class EchoController : ControllerBase
