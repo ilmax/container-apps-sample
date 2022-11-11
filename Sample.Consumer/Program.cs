@@ -31,7 +31,7 @@ var builder = Host.CreateDefaultBuilder()
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new Uri(context.Configuration["ProducerBaseAddress"]);
-            });
+            }) .AddHttpMessageHandler<AzureIdentityAuthHandler<Processor.DerivedClient>>();
         services.AddSingleton<MessagingProvider, CustomMessagingProvider>();
     })
     .ConfigureLogging((context, logging) =>

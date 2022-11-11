@@ -258,6 +258,10 @@ resource "azapi_resource" "consumer-container-app-internal" {
                 "value" : "Sample.Consumer"
               },
               {
+                "name" : "TenantId"
+                "value" : data.azurerm_subscription.current.tenant_id
+              },
+              {
                 "name" : "Server__ApplicationId"
                 "value" : azuread_application.producer-container-app-application.application_id
               }
