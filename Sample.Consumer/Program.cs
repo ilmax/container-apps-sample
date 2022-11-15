@@ -12,21 +12,13 @@ var builder = Host.CreateDefaultBuilder()
     .ConfigureHostConfiguration(configHost => configHost.AddEnvironmentVariables("ASPNETCORE_"))
     .ConfigureServices((context, services) =>
     {
-        var managedIdentityClientId = context.Configuration["ClientId"];
-        var tenantId = context.Configuration["TenantId"];
-        var options = new DefaultAzureCredentialOptions
-        {
-            ManagedIdentityClientId = managedIdentityClientId,
-            VisualStudioTenantId = tenantId
-        };
-
         services.AddTransient(typeof(AzureIdentityAuthHandler<>));
 
         var serverConfigSection = context.Configuration.GetSection("Server");
 
         services.Configure<AzureAdServerApiOptions<Processor.DerivedClient>>(serverConfigSection);
 
-        services.AddSingleton<TokenCredential>(new DefaultAzureCredential(options));
+        services.AddSingleton<TokenCredential>(new ManagedIdentityCredential());
         services.AddHttpClient<Processor.DerivedClient>()
             .ConfigureHttpClient(client =>
             {
