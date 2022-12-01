@@ -23,22 +23,25 @@ builder.Services.AddLogging(loggingBuilder =>
         }
     });
 });
+// Add and configure Azure AD authentication, reads the AzureAD section of the appsettings.json file
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.Configure<ServiceBusConfiguration>(builder.Configuration.GetSection("ServiceBus"));
-builder.Services.AddSingleton(
-new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), credentials));
+builder.Services.AddSingleton(new ServiceBusClient(builder.Configuration.GetSection("ServiceBus").GetValue<string>("Namespace"), credentials));
 builder.Services.AddSingleton<IServiceBusQueueSender, ServiceBusQueueSender>();
 builder.Services.AddCloudRoleNameInitializer("Sample.Producer");
-builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
 var ready = false;
 using var timer = new PeriodicTimer(TimeSpan.FromSeconds(20));
-timer.WaitForNextTickAsync().AsTask().ContinueWith(_ => ready = true);
+timer.WaitForNextTickAsync().AsTask().ContinueWith(_ => {
+    ready = true;
+    timer.Dispose();
+});
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -61,7 +64,7 @@ app.MapGet("/healthz/startup", () =>
 
     if (ready)
     {
-        return Results.Ok("Alive v2");
+        return Results.Ok("Ready");
     }
 
     return Results.BadRequest("Not yet ready");

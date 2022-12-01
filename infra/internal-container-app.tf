@@ -116,6 +116,10 @@ resource "azapi_resource" "producer-container-app-internal" {
                 "value" : data.azurerm_subscription.current.tenant_id
               },
               {
+                "name" : "Logging__LogLevel__Default"
+                "value" : "Debug"
+              },
+              {
                 "name" : "AzureAd__ClientId"
                 "value" : azuread_application.producer-container-app-application.application_id
               },
@@ -125,7 +129,7 @@ resource "azapi_resource" "producer-container-app-internal" {
               },
               {
                 "name" : "AzureAd__TokenValidationParameters__ValidAudience"
-                "value" : azuread_application.producer-container-app-application.application_id
+                "value" : "api://${azuread_application.producer-container-app-application.application_id}"
               },
               {
                 "name" : "AzureAd__TokenValidationParameters__ValidIssuer"
