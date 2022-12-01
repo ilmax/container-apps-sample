@@ -22,7 +22,7 @@ namespace Sample.Consumer
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, 
             CancellationToken cancellationToken)
         {
-            var scopes = new[] { "api://" + _options.ApplicationId + "/.default" };
+            var scopes = new[] { _options.ApplicationId + "/.default" };
             var tokenRequestContext = new TokenRequestContext(scopes);
             var result = await _credential.GetTokenAsync(tokenRequestContext, cancellationToken);
 
