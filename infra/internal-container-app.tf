@@ -27,30 +27,25 @@ resource "azapi_resource" "ace-internal" {
   tags = local.tags
 }
 
-resource "random_uuid" "producer-container-app-application-api-id" {}
+resource "random_uuid" "producer-role-id" {}
 
 resource "azuread_application" "producer-container-app-application" {
   display_name = local.serverAppName
 
+  identifier_uris = ["api://${local.serverAppName}"]
+
   api {
     requested_access_token_version = 2
-
-    oauth2_permission_scope {
-      admin_consent_description  = "Allow the application to access ${local.serverAppName} on behalf of the signed-in user."
-      admin_consent_display_name = "Allow access to ${local.serverAppName}"
-      enabled                    = true
-      id                         = random_uuid.producer-container-app-application-api-id.result
-      type                       = "User"
-      user_consent_description   = "Allow the application to access example on your behalf."
-      user_consent_display_name  = "Access example"
-      value                      = "user_impersonation"
-    }
   }
-}
 
-resource "azuread_service_principal" "producer-container-app-internal-sp" {
-  application_id = azuread_application.producer-container-app-application.application_id
-  description    = "Service principal for ${local.serverAppName} managed by terraform"
+  app_role {
+    allowed_member_types = ["User", "Application"]
+    description          = "Call Api"
+    display_name         = "Call Api"
+    enabled              = true
+    id                   = random_uuid.producer-role-id.result
+    value                = "user_impersonation"
+  }
 }
 
 resource "azapi_resource" "producer-container-app-internal" {
@@ -123,6 +118,18 @@ resource "azapi_resource" "producer-container-app-internal" {
               {
                 "name" : "AzureAd__ClientId"
                 "value" : azuread_application.producer-container-app-application.application_id
+              },
+              {
+                "name" : "AzureAd__TokenValidationParameters__RoleClaimType"
+                "value" : "roles"
+              },
+              {
+                "name" : "AzureAd__TokenValidationParameters__ValidAudience"
+                "value" : azuread_application.producer-container-app-application.application_id
+              },
+              {
+                "name" : "AzureAd__TokenValidationParameters__ValidIssuer"
+                "value" : "https://login.microsoftonline.com/${data.azurerm_subscription.current.tenant_id}/v2.0"
               }
             ]
             probes = [
@@ -178,13 +185,6 @@ resource "azapi_resource" "producer-container-app-internal" {
   depends_on             = [azapi_resource.build-producer-acr-task]
   tags                   = local.tags
   response_export_values = ["properties.configuration.ingress"]
-}
-
-
-resource "azuread_app_role_assignment" "example" {
-  app_role_id         = "00000000-0000-0000-0000-000000000000"
-  principal_object_id = azapi_resource.producer-container-app-internal.identity.0.principal_id
-  resource_object_id  = azuread_service_principal.producer-container-app-internal-sp.object_id
 }
 
 resource "azapi_resource" "consumer-container-app-internal" {
