@@ -18,7 +18,7 @@ resource "random_integer" "name" {
 # azurerm_container_registry_task does not support execute on create (yet)
 # https://github.com/hashicorp/terraform-provider-azurerm/issues/15095
 resource "azapi_resource" "build-producer-acr-task" {
-  name      = "build-producer-task${random_integer.name.id}2"
+  name      = "build-producer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
@@ -39,7 +39,7 @@ resource "azapi_resource" "build-producer-acr-task" {
 }
 
 resource "azapi_resource" "build-consumer-acr-task" {
-  name      = "build-consumer-task${random_integer.name.id}2"
+  name      = "build-consumer-task${random_integer.name.id}"
   location  = var.location
   parent_id = azurerm_container_registry.aca-registry.id
   type      = "Microsoft.ContainerRegistry/registries/taskRuns@2019-06-01-preview"
