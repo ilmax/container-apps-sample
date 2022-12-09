@@ -48,6 +48,11 @@ resource "azuread_application" "producer-container-app-application" {
   }
 }
 
+resource "azuread_service_principal" "producer-container-app-internal-sp" {
+  application_id = azuread_application.producer-container-app-application.application_id
+  # owners         = [data.azuread_client_config.current.object_id]
+}
+
 resource "azapi_resource" "producer-container-app-internal" {
   name      = "producer-containerapp-internal"
   location  = var.location
@@ -129,7 +134,7 @@ resource "azapi_resource" "producer-container-app-internal" {
               },
               {
                 "name" : "AzureAd__TokenValidationParameters__ValidAudience"
-                "value" : "api://${azuread_application.producer-container-app-application.application_id}"
+                "value" : azuread_application.producer-container-app-application.application_id
               },
               {
                 "name" : "AzureAd__TokenValidationParameters__ValidIssuer"
@@ -316,4 +321,50 @@ resource "azurerm_role_assignment" "consumer-internal-service-bus-read" {
   role_definition_name = "Azure Service Bus Data Receiver"
   principal_id         = azapi_resource.consumer-container-app-internal.identity.0.principal_id
   depends_on           = [azapi_resource.consumer-container-app-internal]
+
+  provisioner "local-exec" {
+    command     = "New-AzureADServiceAppRoleAssignment -Id ${random_uuid.producer-role-id.result} -ObjectId ${azapi_resource.consumer-container-app-internal.identity.0.principal_id} -PrincipalId ${azapi_resource.consumer-container-app-internal.identity.0.principal_id} -ResourceId ${azuread_application.producer-container-app-application.object_id}"
+    interpreter = ["PowerShell", "-Command"]
+  }
+}
+
+resource "null_resource" "permissions" {
+  depends_on = [
+    azapi_resource.consumer-container-app-internal,
+    azapi_resource.producer-container-app-internal,
+    azuread_service_principal.producer-container-app-internal-sp
+  ]
+  provisioner "local-exec" {
+    command = <<EOT
+    # The managed identity that will be assigned the permissions (i.e. the client app)
+    $miObjectID = "${azapi_resource.consumer-container-app-internal.identity.0.principal_id}"
+
+    # The app registration ID of the API that's exposing the permissions (i.e. the server app)
+    $appId = "${azuread_application.producer-container-app-application.application_id}"
+
+    # The service principal ID of the API that's exposing the permissions (i.e. the server app)
+    $app = "${azuread_service_principal.producer-container-app-internal-sp.object_id}"
+
+    # The Id of the role that the client app will be assigned
+    $role = "${random_uuid.producer-role-id.result}"
+
+    ## Do not require user interaction to call the Connect-AAzureAD cmdlet
+    $adtoken_container = (az account get-access-token --resource "https://graph.windows.net/" | ConvertFrom-Json)
+    $account = (az account show | ConvertFrom-Json)
+    $adtoken = $adtoken_container.accessToken
+    $user_name = $account.user.name
+    $tenant = $account.tenantId
+    
+    # Connect to Azure AD
+    Connect-AzureAD -aadaccesstoken "$adtoken" -accountid "$user_name" -tenantid "$tenant"
+
+    # Finally grant the permissions if they're not there already
+    $permission = Get-AzureADServiceAppRoleAssignment -ObjectId $miObjectID
+    if ($permission -eq 0) {
+      New-AzureADServiceAppRoleAssignment -Id $role -ObjectId $miObjectID -PrincipalId $miObjectID -ResourceId $app
+    }
+    EOT
+
+    interpreter = ["PowerShell", "-Command"]
+  }
 }

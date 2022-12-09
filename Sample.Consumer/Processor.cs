@@ -27,12 +27,9 @@ public class Processor
 
             var order = message.Body.ToObjectFromJson<Order>();
 
-            if (Random.Shared.Next(0, 10) % 2 ==0)
-            {
-                var discount = await _producerClient.DiscountAsync(order.Id);
+            var discount = await _producerClient.DiscountAsync(order.Id);
 
-                _logger.LogInformation($"Discount for order {order.Id} is {discount.Amount}");
-            }
+            _logger.LogInformation($"Discount for order {order.Id} is {discount.Amount}");
 
             await messageActions.CompleteMessageAsync(message);
         }

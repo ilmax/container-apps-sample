@@ -49,10 +49,6 @@ namespace Sample.Producer.Controllers
         {
             _logger.LogInformation("Getting discount");
             var value = Random.Shared.Next(0, 10);
-            if (value % 3 == 0)
-            {
-                throw new InvalidOperationException("Discount not found");
-            }
             return Task.FromResult<IActionResult>(Ok(new Discount(id)));
         }
     }
