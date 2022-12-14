@@ -139,6 +139,10 @@ resource "azapi_resource" "producer-container-app-internal" {
               {
                 "name" : "AzureAd__TokenValidationParameters__ValidIssuer"
                 "value" : "https://login.microsoftonline.com/${data.azurerm_subscription.current.tenant_id}/v2.0"
+              },
+              {
+                "name" : "AzureAd__TokenValidationParameters__ValidateIssuerSigningKey"
+                "value" : "true"
               }
             ]
             probes = [
